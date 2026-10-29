@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Point Incremential 3</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="start-screen" class="modal visible">
+      <div class="modal-card">
+        <p class="eyebrow">Version 0.0.2</p>
+        <h1>Point Incremential 3</h1>
+        <p>
+          Earn points, buy upgrades, and rebirth for permanent power.
+        </p>
+        <button id="start-button" class="primary-button">Start Game</button>
+      </div>
+    </div>
+
+    <div class="app hidden" id="game-app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Currency</p>
+          <h2 id="points">0</h2>
+        </div>
+        <div class="stats-box">
+          <div>
+            <span>Per Click</span>
+            <strong id="per-click">1</strong>
+          </div>
+          <div>
+            <span>Per Second</span>
+            <strong id="per-second">0</strong>
+          </div>
+          <div>
+            <span>Prestige</span>
+            <strong id="prestige-display">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <main class="game-layout">
+        <section class="panel main-panel">
+          <button id="gain-points" class="main-button">Get Points!</button>
+
+          <div class="prestige-panel">
+            <div>
+              <p class="eyebrow">Rebirth</p>
+              <h3>Reset for permanent boosts</h3>
+            </div>
+            <button id="prestige-button" class="secondary-button">Rebirth</button>
+            <p id="prestige-info" class="muted">Need 1,000 points to rebirth.</p>
+          </div>
+        </section>
+
+        <section class="panel shop-panel">
+          <div class="shop-header">
+            <h3>Point Upgrades</h3>
+            <button id="reset-save" class="mini-button">Reset Save</button>
+          </div>
+          <div id="upgrades" class="upgrades"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
