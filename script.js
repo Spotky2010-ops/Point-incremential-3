@@ -1,9 +1,11 @@
 const STORAGE_KEY = 'point-incremential-3-save-v2';
 const SAVE_VERSION = 2;
 const PRESTIGE_THRESHOLD = 1000;
-const RANK_THRESHOLD = 1000;
 const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
+const RANK_START_THRESHOLD = 1000;
+const RANK_GROWTH = 1.75;
+const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -130,6 +132,14 @@ const upgrades = [
     owned: 0,
   },
 ];
+
+function getRankTitle(level) {
+  return RANK_TITLES[Math.min(Math.max(level, 0), RANK_TITLES.length - 1)];
+}
+
+function getRankRequirement(level) {
+  return Math.floor(RANK_START_THRESHOLD * Math.pow(RANK_GROWTH, Math.max(level, 0)));
+}
 
 function setGameVisibility(visible) {
   if (startScreen) {
@@ -319,7 +329,7 @@ function updateDisplay() {
   }
 
   if (rankDisplayEl) {
-    rankDisplayEl.textContent = formatNumber(rank);
+    rankDisplayEl.textContent = `${formatNumber(rank)} (${getRankTitle(rank)})`;
   }
 
   const rebirthGain = Math.floor(points / PRESTIGE_THRESHOLD);
@@ -331,12 +341,13 @@ function updateDisplay() {
     }
   }
 
-  const rankGain = Math.max(0, Math.floor(points / RANK_THRESHOLD));
+  const nextRankRequirement = getRankRequirement(rank);
+  const nextRankTitle = getRankTitle(rank + 1);
   if (rankInfoEl) {
-    if (points >= RANK_THRESHOLD) {
-      rankInfoEl.textContent = `Ready to rank up for +${formatNumber(rankGain)} rank.`;
+    if (points >= nextRankRequirement) {
+      rankInfoEl.textContent = `Ready to rank up to ${nextRankTitle}.`;
     } else {
-      rankInfoEl.textContent = `Need ${formatNumber(RANK_THRESHOLD)} points to rank up.`;
+      rankInfoEl.textContent = `Need ${formatNumber(nextRankRequirement)} points to rank up to ${nextRankTitle}.`;
     }
   }
 
@@ -354,7 +365,7 @@ function updateDisplay() {
   }
 
   if (rankUpButton) {
-    rankUpButton.disabled = !gameStarted || points < RANK_THRESHOLD;
+    rankUpButton.disabled = !gameStarted || points < nextRankRequirement;
   }
 }
 
@@ -428,13 +439,15 @@ function performPrestige() {
 }
 
 function performRankUp() {
-  if (!gameStarted || points < RANK_THRESHOLD) return;
+  if (!gameStarted) return;
 
-  const rankGain = Math.max(1, Math.floor(points / RANK_THRESHOLD));
-  rank += rankGain;
+  const nextRequirement = getRankRequirement(rank);
+  if (points < nextRequirement) return;
+
+  rank += 1;
   points = 0;
-
   prestige = 0;
+
   upgrades.forEach((upgrade) => {
     upgrade.owned = 0;
   });
