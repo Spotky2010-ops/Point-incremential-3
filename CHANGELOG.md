@@ -3,13 +3,13 @@
 ## [0.1] - 2026-10-29
 
 ### Added
-- New Prestige Buyable Update
-- Prominent "New Prestige Buyable Update" banner on the landing screen
+- Prestige Buyables Update
+- Prominent "Version 0.1 — Prestige Buyables Update" banner on the landing screen
 - HTML metadata for the app version and description
 
 ### Changed
 - Updated the app version from 0.0.3 to 0.1
-- Refreshed the intro presentation for the new prestige buyable system
+- Refreshed the intro presentation for the prestige buyables update
 
 ### Notes
-- This release focuses on the prestige buyable update and version alignment for the game launch screen.
+- This release focuses on the prestige buyables update and version alignment for the game launch screen.
