@@ -1,12 +1,26 @@
+const STORAGE_KEY = 'point-incremential-3-save-v1';
+const PRESTIGE_THRESHOLD = 1000;
+const BASE_PER_CLICK = 1;
+const BASE_PER_SECOND = 0;
+
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
 const perSecondEl = document.getElementById('per-second');
+const prestigeDisplayEl = document.getElementById('prestige-display');
+const prestigeInfoEl = document.getElementById('prestige-info');
 const gainButton = document.getElementById('gain-points');
 const upgradesEl = document.getElementById('upgrades');
+const startButton = document.getElementById('start-button');
+const prestigeButton = document.getElementById('prestige-button');
+const resetSaveButton = document.getElementById('reset-save');
+const startScreen = document.getElementById('start-screen');
+const gameApp = document.getElementById('game-app');
 
 let points = 0;
-let pointsPerClick = 1;
-let pointsPerSecond = 0;
+let pointsPerClick = BASE_PER_CLICK;
+let pointsPerSecond = BASE_PER_SECOND;
+let prestige = 0;
+let gameStarted = false;
 
 const upgrades = [
   {
@@ -111,35 +125,182 @@ const upgrades = [
   },
 ];
 
+function setGameVisibility(visible) {
+  if (startScreen) {
+    startScreen.classList.toggle('hidden', !visible);
+    startScreen.classList.toggle('visible', visible);
+  }
+
+  if (gameApp) {
+    gameApp.classList.toggle('hidden', visible);
+    gameApp.classList.toggle('visible', !visible);
+  }
+}
+
 function formatNumber(value) {
-  return Math.floor(value).toLocaleString();
+  const safeValue = Number.isFinite(value) ? value : 0;
+  return Math.max(0, Math.floor(safeValue)).toLocaleString();
 }
 
 function getUpgradeCost(upgrade) {
-  return Math.floor(upgrade.baseCost * Math.pow(upgrade.costScale, upgrade.owned));
+  const owned = Number.isFinite(upgrade.owned) ? Math.max(0, Math.floor(upgrade.owned)) : 0;
+  return Math.floor(upgrade.baseCost * Math.pow(upgrade.costScale, owned));
+}
+
+function syncDerivedStats() {
+  let clickPower = BASE_PER_CLICK + prestige;
+  let passivePower = BASE_PER_SECOND + prestige;
+
+  upgrades.forEach((upgrade) => {
+    const owned = Number.isFinite(upgrade.owned) ? Math.max(0, Math.floor(upgrade.owned)) : 0;
+    clickPower += owned * upgrade.clickBonus;
+    passivePower += owned * upgrade.passiveBonus;
+  });
+
+  pointsPerClick = clickPower;
+  pointsPerSecond = passivePower;
+}
+
+function saveGame() {
+  try {
+    const payload = {
+      version: 0.2,
+      points,
+      prestige,
+      gameStarted,
+      upgrades: upgrades.map((upgrade) => ({
+        id: upgrade.id,
+        owned: Number.isFinite(upgrade.owned) ? Math.max(0, Math.floor(upgrade.owned)) : 0,
+      })),
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn('Could not save game state:', error);
+  }
+}
+
+function resetGameState() {
+  points = 0;
+  prestige = 0;
+  gameStarted = false;
+  upgrades.forEach((upgrade) => {
+    upgrade.owned = 0;
+  });
+  syncDerivedStats();
+  setGameVisibility(true);
+  renderUpgrades();
+  updateDisplay();
+  saveGame();
+}
+
+function loadGame() {
+  try {
+    const saveData = localStorage.getItem(STORAGE_KEY);
+    if (!saveData) {
+      resetGameState();
+      return;
+    }
+
+    const parsed = JSON.parse(saveData);
+    if (!parsed || typeof parsed !== 'object') {
+      resetGameState();
+      return;
+    }
+
+    if (typeof parsed.points === 'number' && Number.isFinite(parsed.points)) {
+      points = Math.max(0, parsed.points);
+    } else {
+      points = 0;
+    }
+
+    if (typeof parsed.prestige === 'number' && Number.isFinite(parsed.prestige)) {
+      prestige = Math.max(0, parsed.prestige);
+    } else {
+      prestige = 0;
+    }
+
+    if (typeof parsed.gameStarted === 'boolean') {
+      gameStarted = parsed.gameStarted;
+    } else {
+      gameStarted = false;
+    }
+
+    if (Array.isArray(parsed.upgrades)) {
+      upgrades.forEach((upgrade) => {
+        const savedUpgrade = parsed.upgrades.find((item) => item.id === upgrade.id);
+        if (savedUpgrade && typeof savedUpgrade.owned === 'number' && Number.isFinite(savedUpgrade.owned)) {
+          upgrade.owned = Math.max(0, Math.floor(savedUpgrade.owned));
+        } else {
+          upgrade.owned = 0;
+        }
+      });
+    } else {
+      upgrades.forEach((upgrade) => {
+        upgrade.owned = 0;
+      });
+    }
+
+    syncDerivedStats();
+    renderUpgrades();
+    updateDisplay();
+    setGameVisibility(!gameStarted);
+  } catch (error) {
+    console.warn('Could not load save data:', error);
+    resetGameState();
+  }
 }
 
 function updateDisplay() {
-  pointsEl.textContent = formatNumber(points);
-  perClickEl.textContent = formatNumber(pointsPerClick);
-  perSecondEl.textContent = formatNumber(pointsPerSecond);
+  if (pointsEl) {
+    pointsEl.textContent = formatNumber(points);
+  }
+
+  if (perClickEl) {
+    perClickEl.textContent = formatNumber(pointsPerClick);
+  }
+
+  if (perSecondEl) {
+    perSecondEl.textContent = formatNumber(pointsPerSecond);
+  }
+
+  if (prestigeDisplayEl) {
+    prestigeDisplayEl.textContent = formatNumber(prestige);
+  }
+
+  const rebirthGain = Math.floor(points / PRESTIGE_THRESHOLD);
+  if (prestigeInfoEl) {
+    if (points >= PRESTIGE_THRESHOLD) {
+      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.`;
+    } else {
+      prestigeInfoEl.textContent = `Need ${formatNumber(PRESTIGE_THRESHOLD)} points to rebirth.`;
+    }
+  }
 
   upgrades.forEach((upgrade) => {
     const button = document.querySelector(`[data-upgrade-id="${upgrade.id}"]`);
     if (!button) return;
 
     const cost = getUpgradeCost(upgrade);
-    button.disabled = points < cost;
+    button.disabled = points < cost || !gameStarted;
     button.textContent = `Buy for ${formatNumber(cost)}`;
   });
+
+  if (prestigeButton) {
+    prestigeButton.disabled = !gameStarted || points < PRESTIGE_THRESHOLD;
+  }
 }
 
 function gainPoints() {
+  if (!gameStarted) return;
   points += pointsPerClick;
   updateDisplay();
+  saveGame();
 }
 
 function buyUpgrade(upgradeId) {
+  if (!gameStarted) return;
+
   const upgrade = upgrades.find((item) => item.id === upgradeId);
   if (!upgrade) return;
 
@@ -148,13 +309,14 @@ function buyUpgrade(upgradeId) {
 
   points -= cost;
   upgrade.owned += 1;
-  pointsPerClick += upgrade.clickBonus;
-  pointsPerSecond += upgrade.passiveBonus;
-
+  syncDerivedStats();
   updateDisplay();
+  saveGame();
 }
 
 function renderUpgrades() {
+  if (!upgradesEl) return;
+
   upgradesEl.innerHTML = upgrades
     .map(
       (upgrade, index) => `
@@ -180,12 +342,62 @@ function renderUpgrades() {
   updateDisplay();
 }
 
-function gameLoop() {
-  points += pointsPerSecond;
+function performPrestige() {
+  if (!gameStarted || points < PRESTIGE_THRESHOLD) return;
+
+  const prestigeGain = Math.floor(points / PRESTIGE_THRESHOLD);
+  prestige += prestigeGain;
+  points = 0;
+
+  upgrades.forEach((upgrade) => {
+    upgrade.owned = 0;
+  });
+
+  syncDerivedStats();
+  renderUpgrades();
   updateDisplay();
+  saveGame();
 }
 
-gainButton.addEventListener('click', gainPoints);
+function startGame() {
+  gameStarted = true;
+  setGameVisibility(false);
+  renderUpgrades();
+  updateDisplay();
+  saveGame();
+}
+
+function resetSave() {
+  const confirmed = window.confirm('Reset your save and start over?');
+  if (!confirmed) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+  resetGameState();
+}
+
+function gameLoop() {
+  if (!gameStarted) return;
+  points += pointsPerSecond;
+  updateDisplay();
+  saveGame();
+}
+
+if (gainButton) {
+  gainButton.addEventListener('click', gainPoints);
+}
+
+if (startButton) {
+  startButton.addEventListener('click', startGame);
+}
+
+if (prestigeButton) {
+  prestigeButton.addEventListener('click', performPrestige);
+}
+
+if (resetSaveButton) {
+  resetSaveButton.addEventListener('click', resetSave);
+}
 
 renderUpgrades();
+loadGame();
 setInterval(gameLoop, 1000);
