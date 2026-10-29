@@ -1,4 +1,5 @@
-const STORAGE_KEY = 'point-incremential-3-save-v1';
+const STORAGE_KEY = 'point-incremential-3-save-v2';
+const SAVE_VERSION = 2;
 const PRESTIGE_THRESHOLD = 1000;
 const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
@@ -27,8 +28,8 @@ const upgrades = [
     id: 'cursor',
     name: 'Cursor Boost',
     description: 'A stronger cursor gives +1 point per click.',
-    baseCost: 15,
-    costScale: 1.25,
+    baseCost: 12,
+    costScale: 1.22,
     clickBonus: 1,
     passiveBonus: 0,
     owned: 0,
@@ -37,8 +38,8 @@ const upgrades = [
     id: 'manual',
     name: 'Manual Power',
     description: 'Extra hand strength adds +2 points per click.',
-    baseCost: 40,
-    costScale: 1.35,
+    baseCost: 30,
+    costScale: 1.3,
     clickBonus: 2,
     passiveBonus: 0,
     owned: 0,
@@ -47,8 +48,8 @@ const upgrades = [
     id: 'printer',
     name: 'Point Printer',
     description: 'Printers begin producing passive points.',
-    baseCost: 75,
-    costScale: 1.4,
+    baseCost: 80,
+    costScale: 1.35,
     clickBonus: 0,
     passiveBonus: 1,
     owned: 0,
@@ -57,8 +58,8 @@ const upgrades = [
     id: 'operator',
     name: 'Operator Crew',
     description: 'Hire a few workers for +3 per click.',
-    baseCost: 130,
-    costScale: 1.5,
+    baseCost: 150,
+    costScale: 1.42,
     clickBonus: 3,
     passiveBonus: 0,
     owned: 0,
@@ -67,8 +68,8 @@ const upgrades = [
     id: 'factory',
     name: 'Mini Factory',
     description: 'Automated production creates +5 per second.',
-    baseCost: 220,
-    costScale: 1.55,
+    baseCost: 260,
+    costScale: 1.5,
     clickBonus: 0,
     passiveBonus: 5,
     owned: 0,
@@ -77,8 +78,8 @@ const upgrades = [
     id: 'research',
     name: 'Research Lab',
     description: 'New science improves your click power by +5.',
-    baseCost: 350,
-    costScale: 1.6,
+    baseCost: 420,
+    costScale: 1.57,
     clickBonus: 5,
     passiveBonus: 0,
     owned: 0,
@@ -87,8 +88,8 @@ const upgrades = [
     id: 'drone',
     name: 'Drone Squad',
     description: 'Drones add +8 per second.',
-    baseCost: 520,
-    costScale: 1.65,
+    baseCost: 650,
+    costScale: 1.62,
     clickBonus: 0,
     passiveBonus: 8,
     owned: 0,
@@ -97,8 +98,8 @@ const upgrades = [
     id: 'orbital',
     name: 'Orbital Relay',
     description: 'Space infrastructure gives +12 per click.',
-    baseCost: 780,
-    costScale: 1.7,
+    baseCost: 980,
+    costScale: 1.68,
     clickBonus: 12,
     passiveBonus: 0,
     owned: 0,
@@ -107,8 +108,8 @@ const upgrades = [
     id: 'quantum',
     name: 'Quantum Engine',
     description: 'Quantum power creates +20 per second.',
-    baseCost: 1100,
-    costScale: 1.75,
+    baseCost: 1400,
+    costScale: 1.72,
     clickBonus: 0,
     passiveBonus: 20,
     owned: 0,
@@ -117,8 +118,8 @@ const upgrades = [
     id: 'legend',
     name: 'Legendary Core',
     description: 'The final upgrade adds +25 per click and +35 per second.',
-    baseCost: 1600,
-    costScale: 1.8,
+    baseCost: 2200,
+    costScale: 1.78,
     clickBonus: 25,
     passiveBonus: 35,
     owned: 0,
@@ -161,10 +162,66 @@ function syncDerivedStats() {
   pointsPerSecond = passivePower;
 }
 
+function normalizeUpgradeList(rawUpgrades) {
+  const normalized = upgrades.map((upgrade) => ({
+    id: upgrade.id,
+    owned: 0,
+  }));
+
+  if (!Array.isArray(rawUpgrades)) return normalized;
+
+  rawUpgrades.forEach((rawUpgrade) => {
+    if (!rawUpgrade || typeof rawUpgrade.id !== 'string') return;
+    const matchingUpgrade = upgrades.find((upgrade) => upgrade.id === rawUpgrade.id);
+    if (!matchingUpgrade) return;
+    const owned = Number(rawUpgrade.owned);
+    if (Number.isFinite(owned)) {
+      matchingUpgrade.owned = Math.max(0, Math.floor(owned));
+    }
+  });
+
+  return upgrades.map((upgrade) => ({ id: upgrade.id, owned: upgrade.owned }));
+}
+
+function migrateSaveData(rawSave) {
+  const fallback = {
+    version: SAVE_VERSION,
+    points: 0,
+    prestige: 0,
+    gameStarted: false,
+    upgrades: normalizeUpgradeList([]),
+  };
+
+  if (!rawSave || typeof rawSave !== 'object') {
+    return fallback;
+  }
+
+  const migrated = {
+    ...fallback,
+    ...rawSave,
+    version: SAVE_VERSION,
+    upgrades: normalizeUpgradeList(rawSave.upgrades),
+  };
+
+  if (typeof rawSave.points === 'number' && Number.isFinite(rawSave.points)) {
+    migrated.points = Math.max(0, rawSave.points);
+  }
+
+  if (typeof rawSave.prestige === 'number' && Number.isFinite(rawSave.prestige)) {
+    migrated.prestige = Math.max(0, rawSave.prestige);
+  }
+
+  if (typeof rawSave.gameStarted === 'boolean') {
+    migrated.gameStarted = rawSave.gameStarted;
+  }
+
+  return migrated;
+}
+
 function saveGame() {
   try {
     const payload = {
-      version: 0.2,
+      version: SAVE_VERSION,
       points,
       prestige,
       gameStarted,
@@ -203,48 +260,22 @@ function loadGame() {
     }
 
     const parsed = JSON.parse(saveData);
-    if (!parsed || typeof parsed !== 'object') {
-      resetGameState();
-      return;
-    }
+    const migrated = migrateSaveData(parsed);
 
-    if (typeof parsed.points === 'number' && Number.isFinite(parsed.points)) {
-      points = Math.max(0, parsed.points);
-    } else {
-      points = 0;
-    }
+    points = migrated.points;
+    prestige = migrated.prestige;
+    gameStarted = !!migrated.gameStarted;
 
-    if (typeof parsed.prestige === 'number' && Number.isFinite(parsed.prestige)) {
-      prestige = Math.max(0, parsed.prestige);
-    } else {
-      prestige = 0;
-    }
-
-    if (typeof parsed.gameStarted === 'boolean') {
-      gameStarted = parsed.gameStarted;
-    } else {
-      gameStarted = false;
-    }
-
-    if (Array.isArray(parsed.upgrades)) {
-      upgrades.forEach((upgrade) => {
-        const savedUpgrade = parsed.upgrades.find((item) => item.id === upgrade.id);
-        if (savedUpgrade && typeof savedUpgrade.owned === 'number' && Number.isFinite(savedUpgrade.owned)) {
-          upgrade.owned = Math.max(0, Math.floor(savedUpgrade.owned));
-        } else {
-          upgrade.owned = 0;
-        }
-      });
-    } else {
-      upgrades.forEach((upgrade) => {
-        upgrade.owned = 0;
-      });
-    }
+    upgrades.forEach((upgrade) => {
+      const savedUpgrade = migrated.upgrades.find((item) => item.id === upgrade.id);
+      upgrade.owned = savedUpgrade ? Math.max(0, Math.floor(savedUpgrade.owned)) : 0;
+    });
 
     syncDerivedStats();
     renderUpgrades();
     updateDisplay();
     setGameVisibility(!gameStarted);
+    saveGame();
   } catch (error) {
     console.warn('Could not load save data:', error);
     resetGameState();
@@ -282,7 +313,7 @@ function updateDisplay() {
     if (!button) return;
 
     const cost = getUpgradeCost(upgrade);
-    button.disabled = points < cost || !gameStarted;
+    button.disabled = !gameStarted || points < cost;
     button.textContent = `Buy for ${formatNumber(cost)}`;
   });
 
