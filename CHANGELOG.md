@@ -1,14 +1,15 @@
 # Changelog
 
-## [0.0.3] - 2026-10-29
+## [0.1] - 2026-10-29
 
 ### Added
-- Prominent "New CSS Design Update" banner on the landing screen
+- New Prestige Buyable Update
+- Prominent "New Prestige Buyable Update" banner on the landing screen
 - HTML metadata for the app version and description
 
 ### Changed
-- Updated the app version from 0.0.2 to 0.0.3
-- Refreshed the intro presentation for a cleaner visual update
+- Updated the app version from 0.0.3 to 0.1
+- Refreshed the intro presentation for the new prestige buyable system
 
 ### Notes
-- This release focuses on the design refresh and version alignment for the game launch screen.
+- This release focuses on the prestige buyable update and version alignment for the game launch screen.
