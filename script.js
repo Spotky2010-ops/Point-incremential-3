@@ -4,7 +4,7 @@ const PRESTIGE_THRESHOLD = 1000;
 const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
-const RANK_GROWTH = 1.50;
+const RANK_GROWTH = 1.35;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
 const TIER_BURST_REWARDS = [500, 2000, 10000, 50000, 250000];
 
