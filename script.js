@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'point-incremential-3-save-v2';
+const THEME_KEY = 'point-incremential-3-theme';
 const SAVE_VERSION = 2;
 const PRESTIGE_THRESHOLD = 1000;
 const BASE_PER_CLICK = 1;
@@ -23,6 +24,7 @@ const rankUpButton = document.getElementById('rank-up-button');
 const resetSaveButton = document.getElementById('reset-save');
 const startScreen = document.getElementById('start-screen');
 const gameApp = document.getElementById('game-app');
+const themeButton = document.getElementById('theme-toggle');
 
 let points = 0;
 let pointsPerClick = BASE_PER_CLICK;
@@ -30,6 +32,7 @@ let pointsPerSecond = BASE_PER_SECOND;
 let prestige = 0;
 let rank = 0;
 let gameStarted = false;
+let currentTheme = 'dark';
 
 const upgrades = [
   {
@@ -47,7 +50,7 @@ const upgrades = [
     name: 'Manual Power',
     description: 'Extra hand strength adds +2 points per click.',
     baseCost: 35,
-    costScale: 1.10,
+    costScale: 1.1,
     clickBonus: 2,
     passiveBonus: 0,
     owned: 0,
@@ -67,7 +70,7 @@ const upgrades = [
     name: 'Operator Crew',
     description: 'Hire a few workers for +3 per click.',
     baseCost: 180,
-    costScale: 1.20,
+    costScale: 1.2,
     clickBonus: 3,
     passiveBonus: 0,
     owned: 0,
@@ -87,7 +90,7 @@ const upgrades = [
     name: 'Research Lab',
     description: 'New science improves your click power by +5.',
     baseCost: 500,
-    costScale: 1.30,
+    costScale: 1.3,
     clickBonus: 5,
     passiveBonus: 0,
     owned: 0,
@@ -301,6 +304,34 @@ function migrateSaveData(rawSave) {
   return migrated;
 }
 
+function setThemeButtonText() {
+  if (!themeButton) return;
+
+  const isLight = currentTheme === 'light';
+  themeButton.setAttribute('aria-pressed', String(isLight));
+  themeButton.innerHTML = `
+    <span class="theme-toggle__icon">${isLight ? '☀️' : '🌙'}</span>
+    <span class="theme-toggle__label">${isLight ? 'Light' : 'Dark'}</span>
+  `;
+}
+
+function applyTheme(theme) {
+  const normalizedTheme = theme === 'light' ? 'light' : 'dark';
+  currentTheme = normalizedTheme;
+  document.body.setAttribute('data-theme', normalizedTheme);
+  setThemeButtonText();
+
+  try {
+    localStorage.setItem(THEME_KEY, normalizedTheme);
+  } catch (error) {
+    console.warn('Could not save theme preference:', error);
+  }
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+}
+
 function saveGame() {
   try {
     const payload = {
@@ -340,6 +371,13 @@ function resetGameState() {
 
 function loadGame() {
   try {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      applyTheme(savedTheme);
+    } else {
+      applyTheme('dark');
+    }
+
     const saveData = localStorage.getItem(STORAGE_KEY);
     if (!saveData) {
       resetGameState();
@@ -565,6 +603,11 @@ if (resetSaveButton) {
   resetSaveButton.addEventListener('click', resetSave);
 }
 
+if (themeButton) {
+  themeButton.addEventListener('click', toggleTheme);
+}
+
 renderUpgrades();
 loadGame();
 setInterval(gameLoop, 1000);
+

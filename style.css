@@ -1,379 +1,328 @@
-const STORAGE_KEY = 'point-incremential-3-save-v1';
-const PRESTIGE_THRESHOLD = 1000;
-const BASE_PER_CLICK = 1;
-const BASE_PER_SECOND = 0;
+:root {
+  --bg: #0f172a;
+  --bg-accent: rgba(45, 212, 191, 0.12);
+  --panel: rgba(15, 23, 42, 0.82);
+  --panel-strong: rgba(15, 23, 42, 0.98);
+  --panel-alt: rgba(30, 41, 59, 0.9);
+  --card: rgba(15, 23, 42, 0.72);
+  --card-border: rgba(148, 163, 184, 0.25);
+  --text: #e2e8f0;
+  --muted: #cbd5e1;
+  --primary: #8b5cf6;
+  --primary-strong: #7c3aed;
+  --secondary: #22c55e;
+  --button-text: #f8fafc;
+  --shadow: rgba(15, 23, 42, 0.45);
+  --highlight: rgba(168, 85, 247, 0.24);
+  --upgrade-bg: rgba(30, 41, 59, 0.88);
+  --button-hover: #a78bfa;
+}
 
-const pointsEl = document.getElementById('points');
-const perClickEl = document.getElementById('per-click');
-const perSecondEl = document.getElementById('per-second');
-const prestigeDisplayEl = document.getElementById('prestige-display');
-const prestigeInfoEl = document.getElementById('prestige-info');
-const gainButton = document.getElementById('gain-points');
-const upgradesEl = document.getElementById('upgrades');
-const startButton = document.getElementById('start-button');
-const prestigeButton = document.getElementById('prestige-button');
-const resetSaveButton = document.getElementById('reset-save');
-const startScreen = document.getElementById('start-screen');
-const gameApp = document.getElementById('game-app');
+body[data-theme='light'] {
+  --bg: #f8fafc;
+  --bg-accent: rgba(99, 102, 241, 0.08);
+  --panel: rgba(255, 255, 255, 0.9);
+  --panel-strong: rgba(255, 255, 255, 1);
+  --panel-alt: rgba(241, 245, 249, 0.9);
+  --card: rgba(255, 255, 255, 0.94);
+  --card-border: rgba(148, 163, 184, 0.35);
+  --text: #0f172a;
+  --muted: #475569;
+  --primary: #7c3aed;
+  --primary-strong: #6d28d9;
+  --secondary: #16a34a;
+  --button-text: #f8fafc;
+  --shadow: rgba(15, 23, 42, 0.12);
+  --highlight: rgba(124, 58, 237, 0.12);
+  --upgrade-bg: rgba(248, 250, 252, 0.96);
+  --button-hover: #8b5cf6;
+}
 
-let points = 0;
-let pointsPerClick = BASE_PER_CLICK;
-let pointsPerSecond = BASE_PER_SECOND;
-let prestige = 0;
-let gameStarted = false;
+* {
+  box-sizing: border-box;
+}
 
-const upgrades = [
-  {
-    id: 'cursor',
-    name: 'Cursor Boost',
-    description: 'A stronger cursor gives +1 point per click.',
-    baseCost: 15,
-    costScale: 1.25,
-    clickBonus: 1,
-    passiveBonus: 0,
-    owned: 0,
-  },
-  {
-    id: 'manual',
-    name: 'Manual Power',
-    description: 'Extra hand strength adds +2 points per click.',
-    baseCost: 40,
-    costScale: 1.35,
-    clickBonus: 2,
-    passiveBonus: 0,
-    owned: 0,
-  },
-  {
-    id: 'printer',
-    name: 'Point Printer',
-    description: 'Printers begin producing passive points.',
-    baseCost: 75,
-    costScale: 1.4,
-    clickBonus: 0,
-    passiveBonus: 1,
-    owned: 0,
-  },
-  {
-    id: 'operator',
-    name: 'Operator Crew',
-    description: 'Hire a few workers for +3 per click.',
-    baseCost: 130,
-    costScale: 1.5,
-    clickBonus: 3,
-    passiveBonus: 0,
-    owned: 0,
-  },
-  {
-    id: 'factory',
-    name: 'Mini Factory',
-    description: 'Automated production creates +5 per second.',
-    baseCost: 220,
-    costScale: 1.55,
-    clickBonus: 0,
-    passiveBonus: 5,
-    owned: 0,
-  },
-  {
-    id: 'research',
-    name: 'Research Lab',
-    description: 'New science improves your click power by +5.',
-    baseCost: 350,
-    costScale: 1.6,
-    clickBonus: 5,
-    passiveBonus: 0,
-    owned: 0,
-  },
-  {
-    id: 'drone',
-    name: 'Drone Squad',
-    description: 'Drones add +8 per second.',
-    baseCost: 520,
-    costScale: 1.65,
-    clickBonus: 0,
-    passiveBonus: 8,
-    owned: 0,
-  },
-  {
-    id: 'orbital',
-    name: 'Orbital Relay',
-    description: 'Space infrastructure gives +12 per click.',
-    baseCost: 780,
-    costScale: 1.7,
-    clickBonus: 12,
-    passiveBonus: 0,
-    owned: 0,
-  },
-  {
-    id: 'quantum',
-    name: 'Quantum Engine',
-    description: 'Quantum power creates +20 per second.',
-    baseCost: 1100,
-    costScale: 1.75,
-    clickBonus: 0,
-    passiveBonus: 20,
-    owned: 0,
-  },
-  {
-    id: 'legend',
-    name: 'Legendary Core',
-    description: 'The final upgrade adds +25 per click and +35 per second.',
-    baseCost: 1600,
-    costScale: 1.8,
-    clickBonus: 25,
-    passiveBonus: 35,
-    owned: 0,
-  },
-];
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, rgba(139, 92, 246, 0.2), transparent 26%), var(--bg);
+  color: var(--text);
+  transition: background 0.25s ease, color 0.25s ease;
+}
 
-function setGameVisibility(visible) {
-  if (startScreen) {
-    startScreen.classList.toggle('hidden', !visible);
-    startScreen.classList.toggle('visible', visible);
+body {
+  min-height: 100vh;
+}
+
+button {
+  font: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.visible {
+  display: flex !important;
+}
+
+#start-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.3);
+}
+
+.modal-card {
+  width: min(480px, 100%);
+  background: var(--panel-strong);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px var(--shadow);
+  padding: 32px 26px;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 5vw, 3rem);
+}
+
+.primary-button,
+.secondary-button,
+.main-button,
+.theme-toggle,
+.mini-button,
+.upgrade button {
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.main-button:hover,
+.theme-toggle:hover,
+.mini-button:hover,
+.upgrade button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: var(--button-text);
+  font-weight: 700;
+  padding: 12px 22px;
+  min-width: 170px;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--panel);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  padding: 18px 20px;
+  box-shadow: 0 12px 30px var(--shadow);
+  margin-bottom: 20px;
+}
+
+.stats-box {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(100px, 1fr));
+  gap: 12px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.stats-box > div {
+  background: var(--panel-alt);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.stats-box span,
+.meta,
+.muted {
+  color: var(--muted);
+}
+
+.stats-box strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.25rem;
+}
+
+.settings-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel-alt);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.theme-toggle__icon {
+  font-size: 1.1rem;
+}
+
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+  box-shadow: 0 12px 30px var(--shadow);
+  padding: 20px;
+}
+
+.main-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.main-button {
+  background: linear-gradient(135deg, var(--secondary), #22c55e);
+  color: var(--button-text);
+  font-size: clamp(1.2rem, 2vw, 2rem);
+  font-weight: 800;
+  min-height: 130px;
+}
+
+.prestige-panel {
+  display: grid;
+  gap: 14px;
+  background: var(--panel-alt);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.secondary-button {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(34, 197, 94, 0.18));
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+.shop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.mini-button {
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+  padding: 8px 12px;
+}
+
+.upgrades {
+  display: grid;
+  gap: 14px;
+}
+
+.upgrade {
+  background: var(--upgrade-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.upgrade h3 {
+  margin-bottom: 8px;
+}
+
+.upgrade p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.upgrade button {
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+  color: var(--button-text);
+  font-weight: 700;
+}
+
+.upgrade button:disabled,
+.secondary-button:disabled,
+.primary-button:disabled,
+.mini-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .game-layout {
+    grid-template-columns: 1fr;
   }
 
-  if (gameApp) {
-    gameApp.classList.toggle('hidden', visible);
-    gameApp.classList.toggle('visible', !visible);
-  }
-}
-
-function formatNumber(value) {
-  return Math.floor(value).toLocaleString();
-}
-
-function getUpgradeCost(upgrade) {
-  return Math.floor(upgrade.baseCost * Math.pow(upgrade.costScale, upgrade.owned));
-}
-
-function syncDerivedStats() {
-  let clickPower = BASE_PER_CLICK + prestige;
-  let passivePower = BASE_PER_SECOND + prestige;
-
-  upgrades.forEach((upgrade) => {
-    clickPower += upgrade.owned * upgrade.clickBonus;
-    passivePower += upgrade.owned * upgrade.passiveBonus;
-  });
-
-  pointsPerClick = clickPower;
-  pointsPerSecond = passivePower;
-}
-
-function saveGame() {
-  try {
-    const payload = {
-      points,
-      prestige,
-      gameStarted,
-      upgrades: upgrades.map((upgrade) => ({ id: upgrade.id, owned: upgrade.owned })),
-    };
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  } catch (error) {
-    console.warn('Could not save game state:', error);
-  }
-}
-
-function resetGameState() {
-  points = 0;
-  prestige = 0;
-  gameStarted = false;
-  upgrades.forEach((upgrade) => {
-    upgrade.owned = 0;
-  });
-  syncDerivedStats();
-  setGameVisibility(true);
-  renderUpgrades();
-  updateDisplay();
-  saveGame();
-}
-
-function loadGame() {
-  try {
-    const saveData = localStorage.getItem(STORAGE_KEY);
-    if (!saveData) {
-      resetGameState();
-      return;
-    }
-
-    const parsed = JSON.parse(saveData);
-    if (!parsed || typeof parsed !== 'object') {
-      resetGameState();
-      return;
-    }
-
-    if (typeof parsed.points === 'number') {
-      points = parsed.points;
-    }
-
-    if (typeof parsed.prestige === 'number') {
-      prestige = parsed.prestige;
-    }
-
-    if (typeof parsed.gameStarted === 'boolean') {
-      gameStarted = parsed.gameStarted;
-    }
-
-    if (Array.isArray(parsed.upgrades)) {
-      upgrades.forEach((upgrade) => {
-        const savedUpgrade = parsed.upgrades.find((item) => item.id === upgrade.id);
-        if (savedUpgrade && typeof savedUpgrade.owned === 'number') {
-          upgrade.owned = savedUpgrade.owned;
-        }
-      });
-    }
-
-    syncDerivedStats();
-    renderUpgrades();
-    updateDisplay();
-    setGameVisibility(gameStarted);
-  } catch (error) {
-    console.warn('Could not load save data:', error);
-    resetGameState();
-  }
-}
-
-function updateDisplay() {
-  if (pointsEl) {
-    pointsEl.textContent = formatNumber(points);
+  .topbar {
+    align-items: flex-start;
   }
 
-  if (perClickEl) {
-    perClickEl.textContent = formatNumber(pointsPerClick);
-  }
-
-  if (perSecondEl) {
-    perSecondEl.textContent = formatNumber(pointsPerSecond);
-  }
-
-  if (prestigeDisplayEl) {
-    prestigeDisplayEl.textContent = formatNumber(prestige);
-  }
-
-  const rebirthGain = Math.floor(points / PRESTIGE_THRESHOLD);
-  if (prestigeInfoEl) {
-    if (points >= PRESTIGE_THRESHOLD) {
-      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.`;
-    } else {
-      prestigeInfoEl.textContent = `Need ${formatNumber(PRESTIGE_THRESHOLD)} points to rebirth.`;
-    }
-  }
-
-  upgrades.forEach((upgrade) => {
-    const button = document.querySelector(`[data-upgrade-id="${upgrade.id}"]`);
-    if (!button) return;
-
-    const cost = getUpgradeCost(upgrade);
-    button.disabled = points < cost;
-    button.textContent = `Buy for ${formatNumber(cost)}`;
-  });
-
-  if (prestigeButton) {
-    prestigeButton.disabled = points < PRESTIGE_THRESHOLD;
+  .stats-box {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
   }
 }
-
-function gainPoints() {
-  points += pointsPerClick;
-  updateDisplay();
-  saveGame();
-}
-
-function buyUpgrade(upgradeId) {
-  const upgrade = upgrades.find((item) => item.id === upgradeId);
-  if (!upgrade) return;
-
-  const cost = getUpgradeCost(upgrade);
-  if (points < cost) return;
-
-  points -= cost;
-  upgrade.owned += 1;
-  syncDerivedStats();
-  updateDisplay();
-  saveGame();
-}
-
-function renderUpgrades() {
-  if (!upgradesEl) return;
-
-  upgradesEl.innerHTML = upgrades
-    .map(
-      (upgrade, index) => `
-        <article class="upgrade">
-          <h3>${index + 1}. ${upgrade.name}</h3>
-          <p>${upgrade.description}</p>
-          <div class="meta">
-            <span class="cost">Cost: ${formatNumber(getUpgradeCost(upgrade))}</span>
-            <span>Owned: ${upgrade.owned}</span>
-          </div>
-          <button data-upgrade-id="${upgrade.id}" type="button">Buy for ${formatNumber(getUpgradeCost(upgrade))}</button>
-        </article>
-      `
-    )
-    .join('');
-
-  upgradesEl.querySelectorAll('button').forEach((button) => {
-    button.addEventListener('click', () => {
-      buyUpgrade(button.dataset.upgradeId);
-    });
-  });
-
-  updateDisplay();
-}
-
-function performPrestige() {
-  if (points < PRESTIGE_THRESHOLD) return;
-
-  const prestigeGain = Math.floor(points / PRESTIGE_THRESHOLD);
-  prestige += prestigeGain;
-  points = 0;
-
-  upgrades.forEach((upgrade) => {
-    upgrade.owned = 0;
-  });
-
-  syncDerivedStats();
-  renderUpgrades();
-  updateDisplay();
-  saveGame();
-}
-
-function startGame() {
-  gameStarted = true;
-  setGameVisibility(false);
-  saveGame();
-}
-
-function resetSave() {
-  const confirmed = window.confirm('Reset your save and start over?');
-  if (!confirmed) return;
-
-  localStorage.removeItem(STORAGE_KEY);
-  resetGameState();
-}
-
-function gameLoop() {
-  if (!gameStarted) return;
-  points += pointsPerSecond;
-  updateDisplay();
-  saveGame();
-}
-
-if (gainButton) {
-  gainButton.addEventListener('click', gainPoints);
-}
-
-if (startButton) {
-  startButton.addEventListener('click', startGame);
-}
-
-if (prestigeButton) {
-  prestigeButton.addEventListener('click', performPrestige);
-}
-
-if (resetSaveButton) {
-  resetSaveButton.addEventListener('click', resetSave);
-}
-
-renderUpgrades();
-loadGame();
-setInterval(gameLoop, 1000);
