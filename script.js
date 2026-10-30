@@ -5,6 +5,8 @@ const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.50;
+const TIER_UP_REWARD_BASE = 250;
+const TIER_UP_REWARD_GROWTH = 1.75;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
 
 const pointsEl = document.getElementById('points');
@@ -149,6 +151,10 @@ function getRankTitle(level) {
 
 function getRankRequirement(level) {
   return Math.floor(RANK_START_THRESHOLD * Math.pow(RANK_GROWTH, Math.max(level, 0)));
+}
+
+function getRankReward(level) {
+  return Math.floor(TIER_UP_REWARD_BASE * Math.pow(TIER_UP_REWARD_GROWTH, Math.max(level, 0)));
 }
 
 function setGameVisibility(visible) {
@@ -353,11 +359,12 @@ function updateDisplay() {
 
   const nextRankRequirement = getRankRequirement(rank);
   const nextRankTitle = getRankTitle(rank + 1);
+  const nextTierReward = getRankReward(rank);
   if (rankInfoEl) {
     if (points >= nextRankRequirement) {
-      rankInfoEl.textContent = `Ready to rank up to ${nextRankTitle}.`;
+      rankInfoEl.textContent = `Ready to rank up to ${nextRankTitle} and earn +${formatNumber(nextTierReward)} bonus points.`;
     } else {
-      rankInfoEl.textContent = `Need ${formatNumber(nextRankRequirement)} points to rank up to ${nextRankTitle}.`;
+      rankInfoEl.textContent = `Need ${formatNumber(nextRankRequirement)} points to rank up to ${nextRankTitle} for +${formatNumber(nextTierReward)} bonus.`;
     }
   }
 
@@ -454,8 +461,9 @@ function performRankUp() {
   const nextRequirement = getRankRequirement(rank);
   if (points < nextRequirement) return;
 
+  const reward = getRankReward(rank);
   rank += 1;
-  points = 0;
+  points += reward;
   prestige = 0;
 
   upgrades.forEach((upgrade) => {
