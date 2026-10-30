@@ -6,7 +6,7 @@ const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.35;
-const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
+const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster', 'Supermaster'];
 const TIER_BURST_REWARDS = [500, 2000, 10000, 75000, 400000];
 
 const pointsEl = document.getElementById('points');
