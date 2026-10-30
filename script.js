@@ -25,6 +25,7 @@ const resetSaveButton = document.getElementById('reset-save');
 const startScreen = document.getElementById('start-screen');
 const gameApp = document.getElementById('game-app');
 const themeButton = document.getElementById('theme-toggle');
+const themeModeButton = document.getElementById('theme-mode');
 
 let points = 0;
 let pointsPerClick = BASE_PER_CLICK;
@@ -32,7 +33,7 @@ let pointsPerSecond = BASE_PER_SECOND;
 let prestige = 0;
 let rank = 0;
 let gameStarted = false;
-let currentTheme = 'dark';
+let themePreference = 'auto';
 
 const upgrades = [
   {
@@ -304,32 +305,59 @@ function migrateSaveData(rawSave) {
   return migrated;
 }
 
-function setThemeButtonText() {
-  if (!themeButton) return;
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
 
-  const isLight = currentTheme === 'light';
+function updateThemeControls() {
+  if (!themeButton || !themeModeButton) return;
+
+  const activeTheme = themePreference === 'auto' ? getSystemTheme() : themePreference;
+  const isLight = activeTheme === 'light';
+
   themeButton.setAttribute('aria-pressed', String(isLight));
   themeButton.innerHTML = `
     <span class="theme-toggle__icon">${isLight ? '☀️' : '🌙'}</span>
     <span class="theme-toggle__label">${isLight ? 'Light' : 'Dark'}</span>
   `;
+
+  const modeLabel = themePreference === 'auto' ? 'Auto' : themePreference.charAt(0).toUpperCase() + themePreference.slice(1);
+  themeModeButton.innerHTML = `
+    <span class="theme-mode__icon">${themePreference === 'auto' ? '◐' : isLight ? '☀️' : '🌙'}</span>
+    <span class="theme-mode__label">${modeLabel}</span>
+  `;
 }
 
-function applyTheme(theme) {
-  const normalizedTheme = theme === 'light' ? 'light' : 'dark';
-  currentTheme = normalizedTheme;
-  document.body.setAttribute('data-theme', normalizedTheme);
-  setThemeButtonText();
+function applyTheme(nextPreference) {
+  const normalizedPreference = nextPreference === 'light' || nextPreference === 'dark' || nextPreference === 'auto'
+    ? nextPreference
+    : 'auto';
+
+  themePreference = normalizedPreference;
+  const activeTheme = normalizedPreference === 'auto' ? getSystemTheme() : normalizedPreference;
+
+  document.body.setAttribute('data-theme', activeTheme);
+  updateThemeControls();
 
   try {
-    localStorage.setItem(THEME_KEY, normalizedTheme);
+    localStorage.setItem(THEME_KEY, normalizedPreference);
   } catch (error) {
     console.warn('Could not save theme preference:', error);
   }
 }
 
 function toggleTheme() {
-  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  const activeTheme = themePreference === 'auto' ? getSystemTheme() : themePreference;
+  const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+  themePreference = nextTheme;
+  applyTheme(nextTheme);
+}
+
+function cycleThemeMode() {
+  const modes = ['auto', 'light', 'dark'];
+  const currentIndex = modes.indexOf(themePreference);
+  const nextIndex = (currentIndex + 1) % modes.length;
+  applyTheme(modes[nextIndex]);
 }
 
 function saveGame() {
@@ -372,10 +400,10 @@ function resetGameState() {
 function loadGame() {
   try {
     const savedTheme = localStorage.getItem(THEME_KEY);
-    if (savedTheme === 'light' || savedTheme === 'dark') {
+    if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto') {
       applyTheme(savedTheme);
     } else {
-      applyTheme('dark');
+      applyTheme('auto');
     }
 
     const saveData = localStorage.getItem(STORAGE_KEY);
@@ -607,7 +635,25 @@ if (themeButton) {
   themeButton.addEventListener('click', toggleTheme);
 }
 
+if (themeModeButton) {
+  themeModeButton.addEventListener('click', cycleThemeMode);
+}
+
+const prefersColorScheme = window.matchMedia('(prefers-color-scheme: light)');
+if (typeof prefersColorScheme.addEventListener === 'function') {
+  prefersColorScheme.addEventListener('change', () => {
+    if (themePreference === 'auto') {
+      applyTheme('auto');
+    }
+  });
+} else if (typeof prefersColorScheme.addListener === 'function') {
+  prefersColorScheme.addListener(() => {
+    if (themePreference === 'auto') {
+      applyTheme('auto');
+    }
+  });
+}
+
 renderUpgrades();
 loadGame();
 setInterval(gameLoop, 1000);
-
