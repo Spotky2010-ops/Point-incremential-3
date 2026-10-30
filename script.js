@@ -190,31 +190,31 @@ function showTierBurstPopup(amount) {
   popup.style.zIndex = '9999';
   popup.style.padding = '12px 18px';
   popup.style.borderRadius = '14px';
-  popup.style.background = 'linear-gradient(135deg, rgba(124,58,237,0.95), rgba(34,197,94,0.95))';
+  popup.style.background = 'linear-gradient(135deg, rgba(124,58,237,0.96), rgba(34,197,94,0.96), rgba(250,204,21,0.9))';
   popup.style.color = '#fff';
   popup.style.fontWeight = '800';
   popup.style.fontSize = '1rem';
   popup.style.letterSpacing = '0.04em';
-  popup.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.45), 0 0 24px rgba(124,58,237,0.8), 0 0 42px rgba(34,197,94,0.5)';
-  popup.style.border = '1px solid rgba(255,255,255,0.55)';
+  popup.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.52), 0 0 18px rgba(124,58,237,0.8), 0 0 30px rgba(250,204,21,0.6), 0 0 50px rgba(34,197,94,0.45)';
+  popup.style.border = '1px solid rgba(255,255,255,0.7)';
   popup.style.opacity = '0';
-  popup.style.transform = 'translateY(-18px) scale(0.92) rotate(-2deg)';
-  popup.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-  popup.style.filter = 'saturate(1.35)';
-  popup.style.textShadow = '0 0 12px rgba(255,255,255,0.45)';
+  popup.style.transform = 'translateY(-18px) scale(0.92) rotate(-3deg)';
+  popup.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+  popup.style.filter = 'saturate(1.5)';
+  popup.style.textShadow = '0 0 12px rgba(255,255,255,0.5)';
 
   document.body.appendChild(popup);
 
   requestAnimationFrame(() => {
     popup.style.opacity = '1';
-    popup.style.transform = 'translateY(0) scale(1.05) rotate(0deg)';
+    popup.style.transform = 'translateY(0) scale(1.08) rotate(0deg)';
   });
 
   window.setTimeout(() => {
     popup.style.opacity = '0';
     popup.style.transform = 'translateY(-8px) scale(0.98) rotate(1deg)';
-    window.setTimeout(() => popup.remove(), 260);
-  }, 1500);
+    window.setTimeout(() => popup.remove(), 200);
+  }, 1200);
 }
 
 function getUpgradeCost(upgrade) {
