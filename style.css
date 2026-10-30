@@ -16,6 +16,8 @@
   --highlight: rgba(168, 85, 247, 0.24);
   --upgrade-bg: rgba(30, 41, 59, 0.88);
   --button-hover: #a78bfa;
+  --dropdown-bg: rgba(15, 23, 42, 0.96);
+  --status-bg: rgba(148, 163, 184, 0.12);
 }
 
 body[data-theme='light'] {
@@ -36,6 +38,8 @@ body[data-theme='light'] {
   --highlight: rgba(124, 58, 237, 0.12);
   --upgrade-bg: rgba(248, 250, 252, 0.96);
   --button-hover: #8b5cf6;
+  --dropdown-bg: rgba(255, 255, 255, 0.96);
+  --status-bg: rgba(99, 102, 241, 0.08);
 }
 
 * {
@@ -49,7 +53,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: radial-gradient(circle at top, rgba(139, 92, 246, 0.2), transparent 26%), var(--bg);
   color: var(--text);
-  transition: background 0.25s ease, color 0.25s ease;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
 body {
@@ -58,6 +62,7 @@ body {
 
 button {
   font: inherit;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .hidden {
@@ -113,12 +118,12 @@ h1 {
 .main-button,
 .theme-toggle,
 .theme-mode,
+.settings-toggle,
 .mini-button,
 .upgrade button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  transition: transform 0.2s ease, filter 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .primary-button:hover,
@@ -126,6 +131,7 @@ h1 {
 .main-button:hover,
 .theme-toggle:hover,
 .theme-mode:hover,
+.settings-toggle:hover,
 .mini-button:hover,
 .upgrade button:hover {
   transform: translateY(-1px) scale(1.01);
@@ -187,15 +193,79 @@ h1 {
   font-size: 1.25rem;
 }
 
-.settings-panel {
+.settings-shell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.settings-toggle {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 6px;
-  border-radius: 16px;
+  min-height: 42px;
+  padding: 9px 14px;
   background: var(--panel-alt);
+  color: var(--text);
   border: 1px solid var(--card-border);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+  border-radius: 14px;
+}
+
+.settings-toggle__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4em;
+  height: 1.4em;
+  transition: transform 0.25s ease;
+}
+
+.settings-toggle:hover .settings-toggle__icon {
+  transform: rotate(45deg);
+}
+
+.theme-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--status-bg);
+  border: 1px solid var(--card-border);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.settings-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: var(--dropdown-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 18px 30px var(--shadow);
+  padding: 12px;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 20;
+}
+
+.settings-dropdown.is-open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.settings-group {
+  display: grid;
+  gap: 10px;
 }
 
 .theme-toggle,
@@ -205,7 +275,7 @@ h1 {
   justify-content: center;
   gap: 8px;
   min-height: 38px;
-  padding: 8px 12px;
+  padding: 9px 12px;
   background: rgba(148, 163, 184, 0.08);
   border: 1px solid transparent;
   color: var(--text);
@@ -229,12 +299,14 @@ h1 {
 }
 
 .theme-toggle:hover .theme-toggle__icon,
-.theme-mode:hover .theme-mode__icon {
+.theme-mode:hover .theme-mode__icon,
+.settings-toggle:hover .settings-toggle__icon {
   transform: rotate(18deg) scale(1.08);
 }
 
 .theme-toggle:active,
-.theme-mode:active {
+.theme-mode:active,
+.settings-toggle:active {
   transform: scale(0.98);
 }
 
@@ -356,5 +428,20 @@ h1 {
   .stats-box {
     width: 100%;
     grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .settings-shell {
+    width: 100%;
+  }
+
+  .settings-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .settings-dropdown {
+    left: 0;
+    right: auto;
+    width: 100%;
   }
 }

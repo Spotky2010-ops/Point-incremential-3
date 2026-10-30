@@ -24,8 +24,11 @@ const rankUpButton = document.getElementById('rank-up-button');
 const resetSaveButton = document.getElementById('reset-save');
 const startScreen = document.getElementById('start-screen');
 const gameApp = document.getElementById('game-app');
+const settingsToggle = document.getElementById('settings-toggle');
+const settingsDropdown = document.getElementById('settings-dropdown');
 const themeButton = document.getElementById('theme-toggle');
 const themeModeButton = document.getElementById('theme-mode');
+const themeStatusBadge = document.getElementById('theme-status-badge');
 
 let points = 0;
 let pointsPerClick = BASE_PER_CLICK;
@@ -309,6 +312,15 @@ function getSystemTheme() {
   return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
 }
 
+function updateThemeStatusBadge() {
+  if (!themeStatusBadge) return;
+
+  const label = themePreference === 'auto' ? 'Auto' : themePreference.charAt(0).toUpperCase() + themePreference.slice(1);
+  const themeName = themePreference === 'auto' ? `${getSystemTheme()} (system)` : themePreference;
+  themeStatusBadge.textContent = `Saved: ${label}`;
+  themeStatusBadge.title = `Theme saved as ${themeName}`;
+}
+
 function updateThemeControls() {
   if (!themeButton || !themeModeButton) return;
 
@@ -326,6 +338,8 @@ function updateThemeControls() {
     <span class="theme-mode__icon">${themePreference === 'auto' ? '◐' : isLight ? '☀️' : '🌙'}</span>
     <span class="theme-mode__label">${modeLabel}</span>
   `;
+
+  updateThemeStatusBadge();
 }
 
 function applyTheme(nextPreference) {
@@ -349,7 +363,6 @@ function applyTheme(nextPreference) {
 function toggleTheme() {
   const activeTheme = themePreference === 'auto' ? getSystemTheme() : themePreference;
   const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
-  themePreference = nextTheme;
   applyTheme(nextTheme);
 }
 
@@ -358,6 +371,18 @@ function cycleThemeMode() {
   const currentIndex = modes.indexOf(themePreference);
   const nextIndex = (currentIndex + 1) % modes.length;
   applyTheme(modes[nextIndex]);
+}
+
+function setDropdownOpen(isOpen) {
+  if (!settingsDropdown || !settingsToggle) return;
+  settingsDropdown.classList.toggle('is-open', isOpen);
+  settingsToggle.setAttribute('aria-expanded', String(isOpen));
+}
+
+function toggleDropdown() {
+  if (!settingsDropdown) return;
+  const isOpen = settingsDropdown.classList.contains('is-open');
+  setDropdownOpen(!isOpen);
 }
 
 function saveGame() {
@@ -631,13 +656,32 @@ if (resetSaveButton) {
   resetSaveButton.addEventListener('click', resetSave);
 }
 
+if (settingsToggle) {
+  settingsToggle.addEventListener('click', toggleDropdown);
+}
+
 if (themeButton) {
-  themeButton.addEventListener('click', toggleTheme);
+  themeButton.addEventListener('click', () => {
+    toggleTheme();
+    setDropdownOpen(false);
+  });
 }
 
 if (themeModeButton) {
-  themeModeButton.addEventListener('click', cycleThemeMode);
+  themeModeButton.addEventListener('click', () => {
+    cycleThemeMode();
+    setDropdownOpen(false);
+  });
 }
+
+document.addEventListener('click', (event) => {
+  if (!settingsDropdown || !settingsToggle) return;
+
+  const clickedInside = settingsDropdown.contains(event.target) || settingsToggle.contains(event.target);
+  if (!clickedInside) {
+    setDropdownOpen(false);
+  }
+});
 
 const prefersColorScheme = window.matchMedia('(prefers-color-scheme: light)');
 if (typeof prefersColorScheme.addEventListener === 'function') {
