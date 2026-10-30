@@ -6,7 +6,7 @@ const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.50;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
-const TIER_BURST_REWARDS = [500, 2000, 8000, 32000, 128000];
+const TIER_BURST_REWARDS = [500, 2000, 10000, 50000, 250000];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -172,6 +172,45 @@ function setGameVisibility(visible) {
 function formatNumber(value) {
   const safeValue = Number.isFinite(value) ? value : 0;
   return Math.max(0, Math.floor(safeValue)).toLocaleString();
+}
+
+function showTierBurstPopup(amount) {
+  const existingPopup = document.querySelector('.tier-burst-popup');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+
+  const popup = document.createElement('div');
+  popup.className = 'tier-burst-popup';
+  popup.textContent = `Tier Burst! +${formatNumber(amount)}`;
+
+  popup.style.position = 'fixed';
+  popup.style.top = '20px';
+  popup.style.right = '20px';
+  popup.style.zIndex = '9999';
+  popup.style.padding = '12px 18px';
+  popup.style.borderRadius = '12px';
+  popup.style.background = 'linear-gradient(135deg, #7c3aed, #22c55e)';
+  popup.style.color = '#fff';
+  popup.style.fontWeight = '700';
+  popup.style.fontSize = '1rem';
+  popup.style.boxShadow = '0 12px 28px rgba(124, 58, 237, 0.35)';
+  popup.style.opacity = '0';
+  popup.style.transform = 'translateY(-12px) scale(0.96)';
+  popup.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+
+  document.body.appendChild(popup);
+
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateY(0) scale(1)';
+  });
+
+  window.setTimeout(() => {
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateY(-8px) scale(0.97)';
+    window.setTimeout(() => popup.remove(), 260);
+  }, 1500);
 }
 
 function getUpgradeCost(upgrade) {
@@ -465,6 +504,8 @@ function performRankUp() {
   rank += 1;
   points += reward;
   prestige = 0;
+
+  showTierBurstPopup(reward);
 
   upgrades.forEach((upgrade) => {
     upgrade.owned = 0;
