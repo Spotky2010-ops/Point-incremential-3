@@ -4,7 +4,7 @@ const PRESTIGE_THRESHOLD = 1000;
 const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
-const RANK_GROWTH = 1.75;
+const RANK_GROWTH = 1.50;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
 
 const pointsEl = document.getElementById('points');
@@ -33,10 +33,10 @@ let gameStarted = false;
 const upgrades = [
   {
     id: 'cursor',
-    name: 'Cursor Boost',
+    name: 'Basic Cursor',
     description: 'A stronger cursor gives +1 point per click.',
     baseCost: 12,
-    costScale: 1.20,
+    costScale: 1.05,
     clickBonus: 1,
     passiveBonus: 0,
     owned: 0,
@@ -46,7 +46,7 @@ const upgrades = [
     name: 'Manual Power',
     description: 'Extra hand strength adds +2 points per click.',
     baseCost: 35,
-    costScale: 1.25,
+    costScale: 1.10,
     clickBonus: 2,
     passiveBonus: 0,
     owned: 0,
@@ -56,7 +56,7 @@ const upgrades = [
     name: 'Point Printer',
     description: 'Printers begin producing passive points.',
     baseCost: 90,
-    costScale: 1.30,
+    costScale: 1.15,
     clickBonus: 0,
     passiveBonus: 1,
     owned: 0,
@@ -66,7 +66,7 @@ const upgrades = [
     name: 'Operator Crew',
     description: 'Hire a few workers for +3 per click.',
     baseCost: 180,
-    costScale: 1.35,
+    costScale: 1.20,
     clickBonus: 3,
     passiveBonus: 0,
     owned: 0,
@@ -76,7 +76,7 @@ const upgrades = [
     name: 'Mini Factory',
     description: 'Automated production creates +5 per second.',
     baseCost: 320,
-    costScale: 1.40,
+    costScale: 1.25,
     clickBonus: 0,
     passiveBonus: 5,
     owned: 0,
@@ -86,7 +86,7 @@ const upgrades = [
     name: 'Research Lab',
     description: 'New science improves your click power by +5.',
     baseCost: 500,
-    costScale: 1.45,
+    costScale: 1.30,
     clickBonus: 5,
     passiveBonus: 0,
     owned: 0,
@@ -96,7 +96,7 @@ const upgrades = [
     name: 'Drone Squad',
     description: 'Drones add +8 per second.',
     baseCost: 800,
-    costScale: 1.50,
+    costScale: 1.35,
     clickBonus: 0,
     passiveBonus: 8,
     owned: 0,
@@ -106,7 +106,7 @@ const upgrades = [
     name: 'Orbital Relay',
     description: 'Space infrastructure gives +12 per click.',
     baseCost: 1200,
-    costScale: 1.55,
+    costScale: 1.4,
     clickBonus: 12,
     passiveBonus: 0,
     owned: 0,
@@ -116,7 +116,7 @@ const upgrades = [
     name: 'Quantum Engine',
     description: 'Quantum power creates +20 per second.',
     baseCost: 1800,
-    costScale: 1.60,
+    costScale: 1.45,
     clickBonus: 0,
     passiveBonus: 20,
     owned: 0,
@@ -126,7 +126,7 @@ const upgrades = [
     name: 'Legendary Core',
     description: 'The final upgrade adds +25 per click and +35 per second.',
     baseCost: 2800,
-    costScale: 1.65,
+    costScale: 1.5,
     clickBonus: 25,
     passiveBonus: 35,
     owned: 0,
