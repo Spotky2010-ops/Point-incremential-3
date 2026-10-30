@@ -6,7 +6,7 @@ const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.35;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster'];
-const TIER_BURST_REWARDS = [500, 2000, 10000, 50000, 250000];
+const TIER_BURST_REWARDS = [500, 2000, 10000, 75000, 400000];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -189,26 +189,30 @@ function showTierBurstPopup(amount) {
   popup.style.right = '20px';
   popup.style.zIndex = '9999';
   popup.style.padding = '12px 18px';
-  popup.style.borderRadius = '12px';
-  popup.style.background = 'linear-gradient(135deg, #7c3aed, #22c55e)';
+  popup.style.borderRadius = '14px';
+  popup.style.background = 'linear-gradient(135deg, rgba(124,58,237,0.95), rgba(34,197,94,0.95))';
   popup.style.color = '#fff';
-  popup.style.fontWeight = '700';
+  popup.style.fontWeight = '800';
   popup.style.fontSize = '1rem';
-  popup.style.boxShadow = '0 12px 28px rgba(124, 58, 237, 0.35)';
+  popup.style.letterSpacing = '0.04em';
+  popup.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.45), 0 0 24px rgba(124,58,237,0.8), 0 0 42px rgba(34,197,94,0.5)';
+  popup.style.border = '1px solid rgba(255,255,255,0.55)';
   popup.style.opacity = '0';
-  popup.style.transform = 'translateY(-12px) scale(0.96)';
+  popup.style.transform = 'translateY(-18px) scale(0.92) rotate(-2deg)';
   popup.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+  popup.style.filter = 'saturate(1.35)';
+  popup.style.textShadow = '0 0 12px rgba(255,255,255,0.45)';
 
   document.body.appendChild(popup);
 
   requestAnimationFrame(() => {
     popup.style.opacity = '1';
-    popup.style.transform = 'translateY(0) scale(1)';
+    popup.style.transform = 'translateY(0) scale(1.05) rotate(0deg)';
   });
 
   window.setTimeout(() => {
     popup.style.opacity = '0';
-    popup.style.transform = 'translateY(-8px) scale(0.97)';
+    popup.style.transform = 'translateY(-8px) scale(0.98) rotate(1deg)';
     window.setTimeout(() => popup.remove(), 260);
   }, 1500);
 }
