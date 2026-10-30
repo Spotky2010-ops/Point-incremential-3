@@ -1,45 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --bg: #17132a;
-  --bg-accent: rgba(255, 141, 125, 0.18);
-  --panel: rgba(28, 22, 46, 0.86);
-  --panel-strong: rgba(25, 21, 41, 0.98);
-  --panel-alt: rgba(41, 33, 64, 0.92);
-  --card: rgba(23, 19, 42, 0.76);
-  --card-border: rgba(255, 255, 255, 0.12);
-  --text: #f8f5ff;
-  --muted: #d9d1f8;
+  --bg: #120d25;
+  --bg-accent: rgba(249, 168, 212, 0.15);
+  --panel: rgba(22, 18, 38, 0.88);
+  --panel-strong: rgba(18, 15, 31, 0.96);
+  --panel-alt: rgba(39, 32, 58, 0.94);
+  --card: rgba(17, 14, 29, 0.72);
+  --card-border: rgba(255, 255, 255, 0.09);
+  --text: #f7f3ff;
+  --muted: #d8cff6;
   --primary: #ff7a59;
-  --primary-strong: #ff5e87;
+  --primary-strong: #ff5d8f;
   --secondary: #34d399;
-  --button-text: #fff9f7;
-  --shadow: rgba(19, 14, 31, 0.5);
-  --highlight: rgba(255, 122, 89, 0.2);
-  --upgrade-bg: rgba(43, 35, 67, 0.9);
-  --button-hover: #ff9a75;
-  --dropdown-bg: rgba(27, 22, 42, 0.97);
+  --button-text: #fffaf9;
+  --shadow: rgba(13, 10, 24, 0.52);
+  --highlight: rgba(255, 122, 89, 0.22);
+  --upgrade-bg: rgba(44, 36, 66, 0.92);
+  --button-hover: #ff9a73;
+  --dropdown-bg: rgba(20, 17, 33, 0.98);
   --status-bg: rgba(255, 255, 255, 0.08);
 }
 
 body[data-theme='light'] {
-  --bg: #fffaf5;
-  --bg-accent: rgba(255, 122, 89, 0.1);
-  --panel: rgba(255, 255, 255, 0.94);
+  --bg: #fffaf3;
+  --bg-accent: rgba(255, 134, 103, 0.1);
+  --panel: rgba(255, 255, 255, 0.95);
   --panel-strong: rgba(255, 255, 255, 1);
-  --panel-alt: rgba(255, 247, 242, 0.96);
+  --panel-alt: rgba(255, 247, 242, 0.98);
   --card: rgba(255, 255, 255, 0.96);
-  --card-border: rgba(121, 102, 168, 0.2);
-  --text: #2a1a3d;
-  --muted: #5f4d7c;
+  --card-border: rgba(168, 148, 212, 0.18);
+  --text: #2b1d3c;
+  --muted: #634f7d;
   --primary: #ff7a59;
-  --primary-strong: #ff5e87;
-  --secondary: #2fc98d;
-  --button-text: #fff8f6;
-  --shadow: rgba(107, 84, 146, 0.12);
+  --primary-strong: #ff5d8f;
+  --secondary: #2dc98d;
+  --button-text: #fffaf8;
+  --shadow: rgba(56, 49, 95, 0.12);
   --highlight: rgba(255, 122, 89, 0.12);
-  --upgrade-bg: rgba(255, 251, 248, 0.98);
-  --button-hover: #ff946d;
+  --upgrade-bg: rgba(255, 251, 246, 1);
+  --button-hover: #ff936d;
   --dropdown-bg: rgba(255, 255, 255, 0.98);
   --status-bg: rgba(255, 122, 89, 0.08);
 }
@@ -53,10 +53,10 @@ body {
   margin: 0;
   min-height: 100%;
   font-family: 'Fredoka', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: radial-gradient(circle at top, rgba(255, 122, 89, 0.18), transparent 28%), var(--bg);
+  background: radial-gradient(circle at top, rgba(255, 122, 89, 0.16), transparent 28%), var(--bg);
   color: var(--text);
   font-weight: 500;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
   transition: background 0.35s ease, color 0.35s ease;
 }
 
@@ -83,14 +83,14 @@ button {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(15, 23, 42, 0.28);
+  background: rgba(15, 23, 42, 0.18);
 }
 
 .modal-card {
   width: min(480px, 100%);
   background: var(--panel-strong);
   border: 1px solid var(--card-border);
-  border-radius: 28px;
+  border-radius: 30px;
   box-shadow: 0 18px 40px var(--shadow);
   padding: 32px 26px;
   text-align: center;
@@ -121,8 +121,8 @@ h3 {
 
 h1 {
   margin-bottom: 12px;
-  font-size: clamp(2.4rem, 5vw, 3.7rem);
-  line-height: 1;
+  font-size: clamp(2.5rem, 5vw, 3.8rem);
+  line-height: 0.96;
   font-weight: 800;
   letter-spacing: 0.02em;
   text-shadow: 0 4px 0 rgba(255, 122, 89, 0.12);
