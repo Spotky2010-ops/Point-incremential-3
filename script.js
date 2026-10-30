@@ -7,7 +7,7 @@ const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.35;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster', 'Supermaster'];
-const TIER_BURST_REWARDS = [500, 2000, 10000, 75000, 400000];
+const TIER_BURST_REWARDS = [500, 2000, 10000, 100000, 1000000, 10000000];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -152,11 +152,21 @@ const upgrades = [
   {
     id: 'Genius',
     name: 'Genius',
-    description: 'The final upgrade adds +150 per click and +500 per second.',
+    description: 'adds +150 per click and +500 per second.',
     baseCost: 7500,
     costScale: 1.45,
     clickBonus: 150,
     passiveBonus: 500,
+    owned: 0,
+  },
+  {
+    id: 'Very Genius',
+    name: ' Very Genius',
+    description: 'The final upgrade adds +150 per click and +500 per second.',
+    baseCost: 10000,
+    costScale: 1.40,
+    clickBonus: 500,
+    passiveBonus: 1000,
     owned: 0,
   },
 ];
