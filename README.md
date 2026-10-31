@@ -6,6 +6,8 @@ Upcoming Next Updates
 1 November 2026
 Unlock At Rank 10 Tier Up 3rd Prestige Layer
 At Tier 3 Automate Rank Up and no longer Reset for Rank UP
+Redesign Normal Upgrade Tabs
+Added achievements Tabs
 
 2 November 2026
 Unlock At Tier 10 Tetr Up 4th Prestige Layer
