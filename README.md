@@ -17,7 +17,7 @@ At Tetr 2 Keep Rank Up and no longer Reset for Rank UP
 At Tetr 3 Automate Tier Up and no longer Reset for Tier UP
 Unlock At Tetr 10 Pent Up 4th Prestige Layer
 
-3 November 2026
+5 November 2026
 limit 10^308 to 10^^10^308
 Added Montserrat, Gotham and Adobe clean Font.
 
