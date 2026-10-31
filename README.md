@@ -1,25 +1,10 @@
 # Point-incremential-3
 Get a lot of points!
-## Version 0.1.1 - 2026-10-29
 
-### Highlights
-- Rebirth system is now fully functional
-- Added 5 rebirth upgrades
-- Fixed rebirth reset behavior
+Upcoming Next Updates
+Unlock At Rank 10 Tier Up 3rd Prestige Layer
+At Tier 3 Automate Rank Up and no longer Reset for Rank UP
+Unlock At Tier 10 Tetr Up 4th Prestige Layer
+At Tetr 2 Keep Rank Up and no longer Reset for Rank UP
+At Tetr 3 Automate Tier Up and no longer Reset for Tier UP
 
-### Fixed
-Rebirth trigger works correctly
-Upgrade reset on rebirth works as expected
-Version updated to 0.1.1
-
-
-
-## Version 0.0.3
-
-### Highlights
-- New CSS design update and refreshed landing screen styling
-- Updated release metadata to reflect version 0.0.3
-- Polished the intro experience for the game
-
-### Changelog
-- 0.0.3: CSS design refresh and version metadata update
