@@ -77,7 +77,6 @@
               <h3>Reset for Permanent (for Now) boosts and a higher rank</h3>
             </div>
             <button id="rank-up-button" class="secondary-button">Rank Up</button>
-            <button id="prestige-button" class="secondary-button hidden" aria-hidden="true">Prestige</button>
             <p id="prestige-info" class="muted">Need 100 points to Prestige</p>
             <p id="rank-info" class="muted">Need 1,000 points to rank up.</p>
           </div>
@@ -85,10 +84,33 @@
 
         <section class="panel shop-panel">
           <div class="shop-header">
-            <h3>Point Upgrades</h3>
+            <h3>Progress</h3>
             <button id="reset-save" class="mini-button">Reset Save</button>
           </div>
-          <div id="upgrades" class="upgrades"></div>
+
+          <div class="shop-tabs" aria-label="Game sections">
+            <button class="shop-tab is-active" data-tab="upgrades" type="button">Upgrades</button>
+            <button class="shop-tab" data-tab="achievements" type="button">Achievements</button>
+            <button class="shop-tab" data-tab="prestige" type="button">Prestige</button>
+          </div>
+
+          <div class="panel-content is-active" data-panel="upgrades">
+            <div id="upgrades" class="upgrades"></div>
+          </div>
+
+          <div class="panel-content" data-panel="achievements">
+            <div id="achievements" class="achievements"></div>
+          </div>
+
+          <div class="panel-content" data-panel="prestige">
+            <div class="prestige-layer-list">
+              <button class="prestige-layer-button" data-prestige-layer="0" type="button">Prestige</button>
+              <button class="prestige-layer-button" data-prestige-layer="1" type="button">Layer 2</button>
+              <button class="prestige-layer-button" data-prestige-layer="2" type="button">Layer 3</button>
+              <button class="prestige-layer-button" data-prestige-layer="3" type="button">Layer 4</button>
+            </div>
+            <p class="prestige-layer-caption">Layer 2 unlocks at Rank 3, Layer 3 unlocks at Rank 10, and Layer 4 unlocks at Rank 20.</p>
+          </div>
         </section>
       </main>
     </div>

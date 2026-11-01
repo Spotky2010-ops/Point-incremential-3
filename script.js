@@ -6,8 +6,10 @@ const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.325;
-const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster', 'Super', 'Ultra', 'Rank 10+'];
+const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster', 'Super', 'Ultra', 'Rank 10+', 'Rank 10+'];
 const TIER_BURST_REWARDS = [500, 2000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 10000000000];
+const PRESTIGE_LAYER_UNLOCKS = [0, 3, 10, 20];
+const PRESTIGE_LAYER_NAMES = ['Layer 1', 'Layer 2', 'Layer 3', 'Layer 4'];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -18,6 +20,7 @@ const prestigeInfoEl = document.getElementById('prestige-info');
 const rankInfoEl = document.getElementById('rank-info');
 const gainButton = document.getElementById('gain-points');
 const upgradesEl = document.getElementById('upgrades');
+const achievementsEl = document.getElementById('achievements');
 const startButton = document.getElementById('start-button');
 const prestigeButton = document.getElementById('prestige-button');
 const rankUpButton = document.getElementById('rank-up-button');
@@ -29,6 +32,8 @@ const settingsDropdown = document.getElementById('settings-dropdown');
 const themeButton = document.getElementById('theme-toggle');
 const themeModeButton = document.getElementById('theme-mode');
 const themeStatusBadge = document.getElementById('theme-status-badge');
+const shopTabs = Array.from(document.querySelectorAll('.shop-tab'));
+const shopPanels = Array.from(document.querySelectorAll('.panel-content'));
 
 let points = 0;
 let pointsPerClick = BASE_PER_CLICK;
@@ -37,6 +42,16 @@ let prestige = 0;
 let rank = 0;
 let gameStarted = false;
 let themePreference = 'auto';
+let prestigeLayer = 0;
+
+const achievements = [
+  { id: 'first-points', title: 'First Spark', description: 'Earn your first point.', check: () => points >= 1 },
+  { id: 'first-rank', title: 'Rising Rank', description: 'Reach Rank 1.', check: () => rank >= 1 },
+  { id: 'rank-three', title: 'Tier 3', description: 'Unlock automated Rank Up at Tier 3.', check: () => rank >= 3 },
+  { id: 'rank-ten', title: 'Rank 10', description: 'Unlock the 3rd Prestige Layer at Rank 10.', check: () => rank >= 10 },
+  { id: 'prestige-one', title: 'The Rebirth', description: 'Complete your first Prestige.', check: () => prestige >= 1 },
+  { id: 'prestige-layer-four', title: 'The Final Layer', description: 'Unlock Prestige Layer 4.', check: () => rank >= 20 },
+];
 
 const upgrades = [
   {
@@ -164,7 +179,7 @@ const upgrades = [
     name: ' Super Genius',
     description: 'adds +500 per click and +1000 per second.',
     baseCost: 10000,
-    costScale: 1.40,
+    costScale: 1.4,
     clickBonus: 500,
     passiveBonus: 1000,
     owned: 0,
@@ -179,7 +194,7 @@ const upgrades = [
     passiveBonus: 3000,
     owned: 0,
   },
-    {
+  {
     id: 'Upgrade 15',
     name: ' Upgrade 15',
     description: 'adds +5K per click and +10K per second.',
@@ -189,7 +204,7 @@ const upgrades = [
     passiveBonus: 10000,
     owned: 0,
   },
-    {
+  {
     id: 'Upgrade 16',
     name: 'Upgrade 16',
     description: 'adds +20K per click and +50K per second.',
@@ -252,6 +267,21 @@ function getRankRequirement(level) {
 function getRankReward(level) {
   const burstTier = Math.min(Math.floor(level / 2), TIER_BURST_REWARDS.length - 1);
   return TIER_BURST_REWARDS[burstTier];
+}
+
+function getUnlockedPrestigeLayer() {
+  let highestUnlocked = 0;
+  for (let i = 1; i < PRESTIGE_LAYER_UNLOCKS.length; i += 1) {
+    if (rank >= PRESTIGE_LAYER_UNLOCKS[i]) {
+      highestUnlocked = i;
+    }
+  }
+  return highestUnlocked;
+}
+
+function getPrestigeLayerGain(layerIndex) {
+  const multiplier = Math.max(1, layerIndex + 1);
+  return Math.max(1, Math.floor(points / PRESTIGE_THRESHOLD) * multiplier);
 }
 
 function setGameVisibility(visible) {
@@ -364,8 +394,10 @@ function migrateSaveData(rawSave) {
     points: 0,
     prestige: 0,
     rank: 0,
+    prestigeLayer: 0,
     gameStarted: false,
     upgrades: normalizeUpgradeList([]),
+    achievements: achievements.map((achievement) => ({ id: achievement.id, unlocked: false })),
   };
 
   if (!rawSave || typeof rawSave !== 'object') {
@@ -377,6 +409,10 @@ function migrateSaveData(rawSave) {
     ...rawSave,
     version: SAVE_VERSION,
     upgrades: normalizeUpgradeList(rawSave.upgrades),
+    achievements: Array.isArray(rawSave.achievements) ? rawSave.achievements.map((entry) => ({
+      id: entry && entry.id ? entry.id : null,
+      unlocked: !!(entry && entry.unlocked),
+    })) : fallback.achievements,
   };
 
   if (typeof rawSave.points === 'number' && Number.isFinite(rawSave.points)) {
@@ -389,6 +425,10 @@ function migrateSaveData(rawSave) {
 
   if (typeof rawSave.rank === 'number' && Number.isFinite(rawSave.rank)) {
     migrated.rank = Math.max(0, rawSave.rank);
+  }
+
+  if (typeof rawSave.prestigeLayer === 'number' && Number.isFinite(rawSave.prestigeLayer)) {
+    migrated.prestigeLayer = Math.max(0, Math.min(3, Math.floor(rawSave.prestigeLayer)));
   }
 
   if (typeof rawSave.gameStarted === 'boolean') {
@@ -475,6 +515,19 @@ function toggleDropdown() {
   setDropdownOpen(!isOpen);
 }
 
+function setShopTab(tabName) {
+  shopTabs.forEach((button) => {
+    const isActive = button.dataset.tab === tabName;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  shopPanels.forEach((panel) => {
+    const isActive = panel.dataset.panel === tabName;
+    panel.classList.toggle('is-active', isActive);
+  });
+}
+
 function saveGame() {
   try {
     const payload = {
@@ -482,7 +535,12 @@ function saveGame() {
       points,
       prestige,
       rank,
+      prestigeLayer,
       gameStarted,
+      achievements: achievements.map((achievement) => ({
+        id: achievement.id,
+        unlocked: achievement.unlocked,
+      })),
       upgrades: upgrades.map((upgrade) => ({
         id: upgrade.id,
         owned: Number.isFinite(upgrade.owned) ? Math.max(0, Math.floor(upgrade.owned)) : 0,
@@ -499,7 +557,12 @@ function resetGameState() {
   points = 0;
   prestige = 0;
   rank = 0;
+  prestigeLayer = 0;
   gameStarted = false;
+
+  achievements.forEach((achievement) => {
+    achievement.unlocked = false;
+  });
 
   upgrades.forEach((upgrade) => {
     upgrade.owned = 0;
@@ -508,6 +571,7 @@ function resetGameState() {
   syncDerivedStats();
   setGameVisibility(true);
   renderUpgrades();
+  renderAchievements();
   updateDisplay();
   saveGame();
 }
@@ -533,7 +597,13 @@ function loadGame() {
     points = migrated.points;
     prestige = migrated.prestige;
     rank = migrated.rank;
+    prestigeLayer = migrated.prestigeLayer;
     gameStarted = !!migrated.gameStarted;
+
+    achievements.forEach((achievement) => {
+      const savedAchievement = migrated.achievements.find((item) => item.id === achievement.id);
+      achievement.unlocked = !!(savedAchievement && savedAchievement.unlocked);
+    });
 
     upgrades.forEach((upgrade) => {
       const savedUpgrade = migrated.upgrades.find((item) => item.id === upgrade.id);
@@ -542,6 +612,7 @@ function loadGame() {
 
     syncDerivedStats();
     renderUpgrades();
+    renderAchievements();
     updateDisplay();
     setGameVisibility(!gameStarted);
     saveGame();
@@ -551,7 +622,34 @@ function loadGame() {
   }
 }
 
+function checkAchievements() {
+  achievements.forEach((achievement) => {
+    if (!achievement.unlocked && achievement.check()) {
+      achievement.unlocked = true;
+    }
+  });
+}
+
+function renderAchievements() {
+  if (!achievementsEl) return;
+
+  achievementsEl.innerHTML = achievements
+    .map((achievement) => `
+      <article class="achievement ${achievement.unlocked ? 'is-unlocked' : ''}">
+        <div>
+          <h3>${achievement.title}</h3>
+          <p>${achievement.description}</p>
+        </div>
+        <span class="achievement-status">${achievement.unlocked ? 'Unlocked' : 'Locked'}</span>
+      </article>
+    `)
+    .join('');
+}
+
 function updateDisplay() {
+  checkAchievements();
+  renderAchievements();
+
   if (pointsEl) {
     pointsEl.textContent = formatNumber(points);
   }
@@ -572,10 +670,14 @@ function updateDisplay() {
     rankDisplayEl.textContent = `${formatNumber(rank)} (${getRankTitle(rank)})`;
   }
 
+  const unlockedLayer = getUnlockedPrestigeLayer();
+  prestigeLayer = Math.max(0, Math.min(prestigeLayer, unlockedLayer));
+
   const rebirthGain = Math.floor(points / PRESTIGE_THRESHOLD);
   if (prestigeInfoEl) {
     if (points >= PRESTIGE_THRESHOLD) {
-      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.`;
+      const unlockedText = unlockedLayer > 0 ? ` Available layers: ${PRESTIGE_LAYER_NAMES.slice(1, unlockedLayer + 1).join(', ')}.` : '';
+      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.${unlockedText}`;
     } else {
       prestigeInfoEl.textContent = `Need ${formatNumber(PRESTIGE_THRESHOLD)} points to rebirth.`;
     }
@@ -599,6 +701,17 @@ function updateDisplay() {
     const cost = getUpgradeCost(upgrade);
     button.disabled = !gameStarted || points < cost;
     button.textContent = `Buy for ${formatNumber(cost)}`;
+  });
+
+  document.querySelectorAll('[data-prestige-layer]').forEach((button) => {
+    const layerIndex = Number(button.dataset.prestigeLayer);
+    const unlocked = getUnlockedPrestigeLayer() >= layerIndex;
+    const gain = getPrestigeLayerGain(layerIndex);
+    button.disabled = !gameStarted || points < PRESTIGE_THRESHOLD || !unlocked;
+    button.textContent = layerIndex === 0 ? `Prestige (${formatNumber(gain)})` : `${PRESTIGE_LAYER_NAMES[layerIndex]} (${formatNumber(gain)})`;
+    button.title = unlocked
+      ? `Gain ${formatNumber(gain)} prestige from your current total.`
+      : `Unlocks at Rank ${PRESTIGE_LAYER_UNLOCKS[layerIndex]}.`;
   });
 
   if (prestigeButton) {
@@ -662,16 +775,21 @@ function renderUpgrades() {
   updateDisplay();
 }
 
-function performPrestige() {
+function performPrestige(layerIndex = 0) {
   if (!gameStarted || points < PRESTIGE_THRESHOLD) return;
 
-  const prestigeGain = Math.floor(points / PRESTIGE_THRESHOLD);
-  prestige += prestigeGain;
+  const maxUnlockedLayer = getUnlockedPrestigeLayer();
+  if (layerIndex > maxUnlockedLayer) return;
+
+  const gain = getPrestigeLayerGain(layerIndex);
+  prestige += gain;
   points = 0;
 
   upgrades.forEach((upgrade) => {
     upgrade.owned = 0;
   });
+
+  prestigeLayer = Math.max(prestigeLayer, layerIndex);
 
   syncDerivedStats();
   renderUpgrades();
@@ -688,13 +806,25 @@ function performRankUp() {
   const reward = getRankReward(rank);
   rank += 1;
   points += reward;
-  prestige = 0;
+
+  if (rank < 3) {
+    prestige = 0;
+    upgrades.forEach((upgrade) => {
+      upgrade.owned = 0;
+    });
+  }
 
   showTierBurstPopup(reward);
 
-  upgrades.forEach((upgrade) => {
-    upgrade.owned = 0;
-  });
+  if (rank >= 3) {
+    prestigeLayer = Math.max(prestigeLayer, 1);
+  }
+  if (rank >= 10) {
+    prestigeLayer = Math.max(prestigeLayer, 2);
+  }
+  if (rank >= 20) {
+    prestigeLayer = Math.max(prestigeLayer, 3);
+  }
 
   syncDerivedStats();
   renderUpgrades();
@@ -718,10 +848,18 @@ function resetSave() {
   resetGameState();
 }
 
+function autoRankUpIfReady() {
+  if (!gameStarted) return;
+  if (rank >= 3 && points >= getRankRequirement(rank)) {
+    performRankUp();
+  }
+}
+
 function gameLoop() {
   if (!gameStarted) return;
 
   points += pointsPerSecond;
+  autoRankUpIfReady();
   updateDisplay();
   saveGame();
 }
@@ -735,8 +873,14 @@ if (startButton) {
 }
 
 if (prestigeButton) {
-  prestigeButton.addEventListener('click', performPrestige);
+  prestigeButton.addEventListener('click', () => performPrestige(0));
 }
+
+document.querySelectorAll('[data-prestige-layer]').forEach((button) => {
+  button.addEventListener('click', () => {
+    performPrestige(Number(button.dataset.prestigeLayer));
+  });
+});
 
 if (rankUpButton) {
   rankUpButton.addEventListener('click', performRankUp);
@@ -773,6 +917,12 @@ document.addEventListener('click', (event) => {
   }
 });
 
+shopTabs.forEach((button) => {
+  button.addEventListener('click', () => {
+    setShopTab(button.dataset.tab);
+  });
+});
+
 const prefersColorScheme = window.matchMedia('(prefers-color-scheme: light)');
 if (typeof prefersColorScheme.addEventListener === 'function') {
   prefersColorScheme.addEventListener('change', () => {
@@ -789,5 +939,6 @@ if (typeof prefersColorScheme.addEventListener === 'function') {
 }
 
 renderUpgrades();
+renderAchievements();
 loadGame();
 setInterval(gameLoop, 1000);
