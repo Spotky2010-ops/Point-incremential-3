@@ -5,25 +5,6 @@ Reach 10^^10^308 Number What it No More Upgrade
 
 Upcoming Next Updates
 
-1 November 2026
-Unlock At Rank 10 Tier Up 3rd Prestige Layer
-At Tier 3 Automate Rank Up and no longer Reset for Rank UP
-Redesign Normal Upgrade Tabs
-Added achievements Tabs
-Added Prestige Buttons
-Unlock At Tier 10 Tetr Up 4th Prestige Layer
-
-
-2 November 2026
-At Tetr 2 Keep Rank Up and no longer Reset for Rank UP
-At Tetr 3 Automate Tier Up and no longer Reset for Tier UP
-Unlock At Tetr 10 Pent Up 4th Prestige Layer
-At Pent 2 Keep Rank,Tier Up and no longer Reset for Rank UP,Tier Up
-
-5 November 2026
-limit 10^308 to 10^^10^308
-Added Montserrat, Gotham and Adobe clean Font.
-
 prestige layer currency of Future
 1 Presitge
 2 Rank
