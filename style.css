@@ -23,6 +23,10 @@
   --achievement-bg: rgba(60, 48, 88, 0.86);
   --achievement-locked: rgba(148, 163, 184, 0.12);
   --prestige-active: rgba(52, 211, 153, 0.2);
+  --super-prestige-start: #fbbf24;
+  --super-prestige-mid: #f97316;
+  --super-prestige-end: #ef4444;
+  --super-prestige-glow: rgba(251, 191, 36, 0.5);
 }
 
 body[data-theme='light'] {
@@ -48,6 +52,10 @@ body[data-theme='light'] {
   --achievement-bg: rgba(255, 244, 238, 0.96);
   --achievement-locked: rgba(104, 109, 126, 0.09);
   --prestige-active: rgba(45, 201, 141, 0.15);
+  --super-prestige-start: #facc15;
+  --super-prestige-mid: #fb923c;
+  --super-prestige-end: #f43f5e;
+  --super-prestige-glow: rgba(251, 146, 60, 0.32);
 }
 
 * {
@@ -535,9 +543,54 @@ h1 {
 }
 
 .prestige-layer-button {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(135deg, rgba(52, 211, 153, 0.18), rgba(255, 122, 89, 0.16));
   border: 1px solid var(--card-border);
   color: var(--text);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.prestige-layer-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.12) 45%, transparent 100%);
+  transform: translateX(-120%);
+  transition: transform 0.5s ease;
+}
+
+.prestige-layer-button:hover::before {
+  transform: translateX(120%);
+}
+
+.prestige-layer-button[data-prestige-layer='4'] {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.88), rgba(249, 115, 22, 0.9), rgba(239, 68, 68, 0.9));
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 22px var(--super-prestige-glow), 0 12px 24px rgba(249, 115, 22, 0.28);
+  animation: superPrestigePulse 2.2s ease-in-out infinite alternate;
+}
+
+.prestige-layer-button[data-prestige-layer='4']:not(:disabled) {
+  color: #fff9f2;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.prestige-layer-button[data-prestige-layer='4']:disabled {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.12), rgba(71, 85, 105, 0.18));
+  box-shadow: none;
+  animation: none;
+}
+
+@keyframes superPrestigePulse {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 18px var(--super-prestige-glow), 0 10px 24px rgba(249, 115, 22, 0.26);
+  }
+  100% {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 0 30px rgba(251, 191, 36, 0.9), 0 16px 30px rgba(239, 68, 68, 0.38);
+  }
 }
 
 .prestige-layer-button:disabled,
