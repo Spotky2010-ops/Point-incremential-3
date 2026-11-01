@@ -2,14 +2,15 @@ const STORAGE_KEY = 'point-incremential-3-save-v2';
 const THEME_KEY = 'point-incremential-3-theme';
 const SAVE_VERSION = 2;
 const PRESTIGE_THRESHOLD = 100;
+const SUPER_PRESTIGE_THRESHOLD = 1000000;
 const BASE_PER_CLICK = 1;
 const BASE_PER_SECOND = 0;
 const RANK_START_THRESHOLD = 1000;
 const RANK_GROWTH = 1.325;
 const RANK_TITLES = ['Rookie', 'Pro', 'Elite', 'Legend', 'Mythic', 'Ascendant', 'Grandmaster', 'Super', 'Ultra', 'Rank 10+', 'Rank 10+'];
 const TIER_BURST_REWARDS = [500, 2000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 10000000000];
-const PRESTIGE_LAYER_UNLOCKS = [0, 3, 10, 20];
-const PRESTIGE_LAYER_NAMES = ['Layer 1', 'Layer 2', 'Layer 3', 'Layer 4'];
+const PRESTIGE_LAYER_UNLOCKS = [0, 3, 10, 20, 30];
+const PRESTIGE_LAYER_NAMES = ['Layer 1', 'Layer 2', 'Layer 3', 'Layer 4', 'Super Prestige'];
 
 const pointsEl = document.getElementById('points');
 const perClickEl = document.getElementById('per-click');
@@ -40,6 +41,7 @@ let pointsPerClick = BASE_PER_CLICK;
 let pointsPerSecond = BASE_PER_SECOND;
 let prestige = 0;
 let rank = 0;
+let superPrestige = 0;
 let gameStarted = false;
 let themePreference = 'auto';
 let prestigeLayer = 0;
@@ -51,6 +53,7 @@ const achievements = [
   { id: 'rank-ten', title: 'Rank 10', description: 'Unlock the 3rd Prestige Layer at Rank 10.', check: () => rank >= 10 },
   { id: 'prestige-one', title: 'The Rebirth', description: 'Complete your first Prestige.', check: () => prestige >= 1 },
   { id: 'prestige-layer-four', title: 'The Final Layer', description: 'Unlock Prestige Layer 4.', check: () => rank >= 20 },
+  { id: 'super-prestige', title: 'Super Prestige', description: 'Reach the Super Prestige layer.', check: () => superPrestige >= 1 },
 ];
 
 const upgrades = [
@@ -254,6 +257,106 @@ const upgrades = [
     passiveBonus: 15000000,
     owned: 0,
   },
+  {
+    id: 'super-prestige-1',
+    name: 'Super Prestige I',
+    description: 'Adds +2.5K per click and +5K per second.',
+    baseCost: 1000000,
+    costScale: 1.5,
+    clickBonus: 2500,
+    passiveBonus: 5000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-2',
+    name: 'Super Prestige II',
+    description: 'Adds +5K per click and +12K per second.',
+    baseCost: 2500000,
+    costScale: 1.52,
+    clickBonus: 5000,
+    passiveBonus: 12000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-3',
+    name: 'Super Prestige III',
+    description: 'Adds +12K per click and +28K per second.',
+    baseCost: 7500000,
+    costScale: 1.54,
+    clickBonus: 12000,
+    passiveBonus: 28000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-4',
+    name: 'Super Prestige IV',
+    description: 'Adds +25K per click and +60K per second.',
+    baseCost: 15000000,
+    costScale: 1.56,
+    clickBonus: 25000,
+    passiveBonus: 60000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-5',
+    name: 'Super Prestige V',
+    description: 'Adds +60K per click and +150K per second.',
+    baseCost: 40000000,
+    costScale: 1.58,
+    clickBonus: 60000,
+    passiveBonus: 150000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-6',
+    name: 'Super Prestige VI',
+    description: 'Adds +150K per click and +375K per second.',
+    baseCost: 100000000,
+    costScale: 1.6,
+    clickBonus: 150000,
+    passiveBonus: 375000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-7',
+    name: 'Super Prestige VII',
+    description: 'Adds +400K per click and +900K per second.',
+    baseCost: 250000000,
+    costScale: 1.62,
+    clickBonus: 400000,
+    passiveBonus: 900000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-8',
+    name: 'Super Prestige VIII',
+    description: 'Adds +1.2M per click and +2.5M per second.',
+    baseCost: 750000000,
+    costScale: 1.64,
+    clickBonus: 1200000,
+    passiveBonus: 2500000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-9',
+    name: 'Super Prestige IX',
+    description: 'Adds +3M per click and +7.5M per second.',
+    baseCost: 2000000000,
+    costScale: 1.66,
+    clickBonus: 3000000,
+    passiveBonus: 7500000,
+    owned: 0,
+  },
+  {
+    id: 'super-prestige-10',
+    name: 'Super Prestige X',
+    description: 'Adds +8M per click and +20M per second.',
+    baseCost: 5000000000,
+    costScale: 1.68,
+    clickBonus: 8000000,
+    passiveBonus: 20000000,
+    owned: 0,
+  },
 ];
 
 function getRankTitle(level) {
@@ -281,7 +384,11 @@ function getUnlockedPrestigeLayer() {
 
 function getPrestigeLayerGain(layerIndex) {
   const multiplier = Math.max(1, layerIndex + 1);
-  return Math.max(1, Math.floor(points / PRESTIGE_THRESHOLD) * multiplier);
+  const baseGain = Math.max(1, Math.floor(points / PRESTIGE_THRESHOLD) * multiplier);
+  if (layerIndex === 4) {
+    return Math.max(1, baseGain + Math.floor(superPrestige / 2) + 1);
+  }
+  return baseGain;
 }
 
 function setGameVisibility(visible) {
@@ -350,8 +457,8 @@ function getUpgradeCost(upgrade) {
 }
 
 function syncDerivedStats() {
-  let clickPower = BASE_PER_CLICK + prestige + rank * 2;
-  let passivePower = BASE_PER_SECOND + prestige + rank * 3;
+  let clickPower = BASE_PER_CLICK + prestige + rank * 2 + superPrestige * 2;
+  let passivePower = BASE_PER_SECOND + prestige + rank * 3 + superPrestige * 5;
 
   upgrades.forEach((upgrade) => {
     const owned = Number.isFinite(upgrade.owned) ? Math.max(0, Math.floor(upgrade.owned)) : 0;
@@ -393,6 +500,7 @@ function migrateSaveData(rawSave) {
     version: SAVE_VERSION,
     points: 0,
     prestige: 0,
+    superPrestige: 0,
     rank: 0,
     prestigeLayer: 0,
     gameStarted: false,
@@ -423,12 +531,16 @@ function migrateSaveData(rawSave) {
     migrated.prestige = Math.max(0, rawSave.prestige);
   }
 
+  if (typeof rawSave.superPrestige === 'number' && Number.isFinite(rawSave.superPrestige)) {
+    migrated.superPrestige = Math.max(0, rawSave.superPrestige);
+  }
+
   if (typeof rawSave.rank === 'number' && Number.isFinite(rawSave.rank)) {
     migrated.rank = Math.max(0, rawSave.rank);
   }
 
   if (typeof rawSave.prestigeLayer === 'number' && Number.isFinite(rawSave.prestigeLayer)) {
-    migrated.prestigeLayer = Math.max(0, Math.min(3, Math.floor(rawSave.prestigeLayer)));
+    migrated.prestigeLayer = Math.max(0, Math.min(4, Math.floor(rawSave.prestigeLayer)));
   }
 
   if (typeof rawSave.gameStarted === 'boolean') {
@@ -534,6 +646,7 @@ function saveGame() {
       version: SAVE_VERSION,
       points,
       prestige,
+      superPrestige,
       rank,
       prestigeLayer,
       gameStarted,
@@ -556,6 +669,7 @@ function saveGame() {
 function resetGameState() {
   points = 0;
   prestige = 0;
+  superPrestige = 0;
   rank = 0;
   prestigeLayer = 0;
   gameStarted = false;
@@ -596,6 +710,7 @@ function loadGame() {
 
     points = migrated.points;
     prestige = migrated.prestige;
+    superPrestige = migrated.superPrestige;
     rank = migrated.rank;
     prestigeLayer = migrated.prestigeLayer;
     gameStarted = !!migrated.gameStarted;
@@ -663,7 +778,7 @@ function updateDisplay() {
   }
 
   if (prestigeDisplayEl) {
-    prestigeDisplayEl.textContent = formatNumber(prestige);
+    prestigeDisplayEl.textContent = formatNumber(prestige + superPrestige);
   }
 
   if (rankDisplayEl) {
@@ -675,11 +790,12 @@ function updateDisplay() {
 
   const rebirthGain = Math.floor(points / PRESTIGE_THRESHOLD);
   if (prestigeInfoEl) {
+    const unlockedText = unlockedLayer > 0 ? ` Available layers: ${PRESTIGE_LAYER_NAMES.slice(1, unlockedLayer + 1).join(', ')}.` : '';
+    const superPrestigeText = rank >= PRESTIGE_LAYER_UNLOCKS[4] ? ` Super Prestige is ready at ${formatNumber(SUPER_PRESTIGE_THRESHOLD)} points.` : '';
     if (points >= PRESTIGE_THRESHOLD) {
-      const unlockedText = unlockedLayer > 0 ? ` Available layers: ${PRESTIGE_LAYER_NAMES.slice(1, unlockedLayer + 1).join(', ')}.` : '';
-      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.${unlockedText}`;
+      prestigeInfoEl.textContent = `Ready to rebirth for +${formatNumber(rebirthGain)} prestige.${unlockedText}${superPrestigeText}`;
     } else {
-      prestigeInfoEl.textContent = `Need ${formatNumber(PRESTIGE_THRESHOLD)} points to rebirth.`;
+      prestigeInfoEl.textContent = `Need ${formatNumber(PRESTIGE_THRESHOLD)} points to rebirth. ${superPrestigeText}`.trim();
     }
   }
 
@@ -707,8 +823,9 @@ function updateDisplay() {
     const layerIndex = Number(button.dataset.prestigeLayer);
     const unlocked = getUnlockedPrestigeLayer() >= layerIndex;
     const gain = getPrestigeLayerGain(layerIndex);
-    button.disabled = !gameStarted || points < PRESTIGE_THRESHOLD || !unlocked;
-    button.textContent = layerIndex === 0 ? `Prestige (${formatNumber(gain)})` : `${PRESTIGE_LAYER_NAMES[layerIndex]} (${formatNumber(gain)})`;
+    const threshold = layerIndex === 4 ? SUPER_PRESTIGE_THRESHOLD : PRESTIGE_THRESHOLD;
+    button.disabled = !gameStarted || points < threshold || !unlocked;
+    button.textContent = layerIndex === 0 ? `Prestige (${formatNumber(gain)})` : layerIndex === 4 ? `Super Prestige (${formatNumber(gain)})` : `${PRESTIGE_LAYER_NAMES[layerIndex]} (${formatNumber(gain)})`;
     button.title = unlocked
       ? `Gain ${formatNumber(gain)} prestige from your current total.`
       : `Unlocks at Rank ${PRESTIGE_LAYER_UNLOCKS[layerIndex]}.`;
@@ -776,10 +893,30 @@ function renderUpgrades() {
 }
 
 function performPrestige(layerIndex = 0) {
-  if (!gameStarted || points < PRESTIGE_THRESHOLD) return;
+  if (!gameStarted) return;
 
   const maxUnlockedLayer = getUnlockedPrestigeLayer();
   if (layerIndex > maxUnlockedLayer) return;
+
+  if (layerIndex === 4) {
+    if (rank < PRESTIGE_LAYER_UNLOCKS[4] || points < SUPER_PRESTIGE_THRESHOLD) return;
+    const gain = getPrestigeLayerGain(layerIndex);
+    superPrestige += gain;
+    points = 0;
+    prestige = 0;
+    rank = 0;
+    upgrades.forEach((upgrade) => {
+      upgrade.owned = 0;
+    });
+    prestigeLayer = 0;
+    syncDerivedStats();
+    renderUpgrades();
+    updateDisplay();
+    saveGame();
+    return;
+  }
+
+  if (points < PRESTIGE_THRESHOLD) return;
 
   const gain = getPrestigeLayerGain(layerIndex);
   prestige += gain;
@@ -824,6 +961,9 @@ function performRankUp() {
   }
   if (rank >= 20) {
     prestigeLayer = Math.max(prestigeLayer, 3);
+  }
+  if (rank >= 30) {
+    prestigeLayer = Math.max(prestigeLayer, 4);
   }
 
   syncDerivedStats();
